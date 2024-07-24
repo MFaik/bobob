@@ -14,8 +14,8 @@ void Game::setup(int x_size, int y_size) {
         free(_objects);
     _x = x_size;
     _y = y_size;
-    _tiles = (Tile*)malloc(_x*_y*sizeof(Tile));
-    _objects = (Object*)malloc(_x*_y*sizeof(Object));
+    _tiles = (Tile*)calloc(_x*_y, sizeof(Tile));
+    _objects = (Object*)calloc(_x*_y, sizeof(Object));
 }
 
 
