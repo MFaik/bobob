@@ -57,7 +57,7 @@ void Robot::look() {
     }
 }
 
-void Robot::select(uint i) {
+void Robot::select(unsigned int i) {
     if(i < sizeof(_inventory)/sizeof(_inventory[0])) {
         _inventory_selector = i;
         _input = _inventory[i];
@@ -95,8 +95,8 @@ void Robot::use() {
     }
 }
 
-void Robot::sleep(uint i) {
-    _sleep_dur = i;
+void Robot::sleep(unsigned int ticks) {
+    _sleep_dur = ticks;
 }
 
 void Robot::tick() {

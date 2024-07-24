@@ -35,7 +35,7 @@ private:
     int _inventory_selector = 0;
     int _cond = 0;
     int _a = 0, _b = 0, _input = 0, _pointer = 0;
-    int _sleep_dur = 0;
+    unsigned int _sleep_dur = 0;
 
 public:
     int _x, _y, _dir = NORTH;
@@ -50,8 +50,8 @@ public:
 
     void go_forward();
     void look();
-    void select(uint i);
+    void select(unsigned int i);
     void use();
-    void sleep(uint i);
+    void sleep(unsigned int ticks);
     void tick();
 };

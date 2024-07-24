@@ -57,7 +57,7 @@ void Game::add_robot(int x, int y) {
 }
 
 Robot* Game::get_robot(int x, int y) {
-    for(uint i = 0;i < _robots.size();i++) {
+    for(size_t i = 0;i < _robots.size();i++) {
         auto& robot = _robots[i];
         if(robot->_x == x && robot->_y == y) {
             return robot;
@@ -67,7 +67,7 @@ Robot* Game::get_robot(int x, int y) {
 }
 
 bool Game::remove_robot(int x, int y) {
-    for(uint i = 0;i < _robots.size();i++) {
+    for(size_t i = 0;i < _robots.size();i++) {
         auto& robot = _robots[i];
         if(robot->_x == x && robot->_y == y) {
             free(robot);
