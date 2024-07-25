@@ -27,6 +27,8 @@ enum Item {
 class Robot {
     friend class CodeRunner;
 private:
+//TODO: remove public
+public:
     Item _inventory[16];
 
     //registers

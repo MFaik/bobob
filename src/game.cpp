@@ -5,13 +5,6 @@ Game g_game;
 extern CodeRunner g_code_runner;
 extern Map g_map;
 
-void Game::setup_robots() {
-    for(auto robot : _robots) {
-        free(robot);
-    }
-    _robots.clear();
-}
-
 void Game::setup_map() {
     //TODO: this will probably take in a file name 
     g_map.clean_chunks();
@@ -47,36 +40,21 @@ void Game::draw() {
 
 void Game::add_robot(int x, int y) {
     Robot *robot = new Robot(x, y);
-    _robots.push_back(robot);
+    g_map.add_robot(x, y, robot);
 }
 
 Robot* Game::get_robot(int x, int y) {
-    for(size_t i = 0;i < _robots.size();i++) {
-        auto& robot = _robots[i];
-        if(robot->_x == x && robot->_y == y) {
-            return robot;
-        }
-    }
-    return nullptr;
+    return g_map.get_robot(x, y);
 }
 
-bool Game::remove_robot(int x, int y) {
-    for(size_t i = 0;i < _robots.size();i++) {
-        auto& robot = _robots[i];
-        if(robot->_x == x && robot->_y == y) {
-            free(robot);
-            _robots.erase(_robots.begin()+i);
-            return true;
-        }
-    }
-
-    return false;
+void Game::remove_robot(int x, int y) {
+    g_map.remove_robot(x, y);
 }
 
 void Game::tick() {
-    //TODO: add tick function
+    g_map.tick();
 }
 
 Game::~Game() {
-    //TODO does this even need to exist?
+    //TODO: does this even need to exist?
 }

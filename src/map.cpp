@@ -1,4 +1,7 @@
+#include <unordered_set>
+
 #include "map.h"
+#include "robot.h"
 
 Map g_map;
 
@@ -31,45 +34,116 @@ void Map::draw(int x, int y) {
     draw(get_tile(x, y)._type);
 }
 
-void Map::load_chunk(int x, int y) {
-    //TODO: this will probably have some async file
+void Map::load_chunk(int chunk_x, int chunk_y) {
+    //TODO: this will probably have some async file read
     //and/or procedural generation thing
-    auto chunk = _chunks.find({x, y});
+    auto chunk = _chunks.find({chunk_x, chunk_y});
     if(chunk == _chunks.end()) {
-        _chunks[{x, y}] = (Chunk*)calloc(1, sizeof(Chunk));
+        _chunks[{chunk_x, chunk_y}] = (Chunk*)calloc(1, sizeof(Chunk));
     }
 }
 
-void Map::unload_chunk(int x, int y) {
-    _chunks.erase({x, y});
+//TODO: we can remove the conditional if the chunk is guaranteed to exist
+void Map::unload_chunk(int chunk_x, int chunk_y) {
+    auto chunk = _chunks.find({chunk_x, chunk_y});
+    if(chunk != _chunks.end()) {
+        for(auto robot : chunk->second->_robots) {
+            free(robot);
+        }
+        free(chunk->second);
+        _chunks.erase(chunk);
+    }
 }
 
 void Map::clean_chunks() {
+    for(auto &chunk : _chunks) {
+        for(auto robot : chunk.second->_robots) {
+            free(robot);
+        }
+        free(chunk.second);
+    }
     _chunks.clear();
 }
 
-inline int Map::convert_position(int x, int y) {
+inline int Map::global_to_local(int x, int y) {
     return ((x%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE)*CHUNK_SIZE +
-           ((y%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE);
+        ((y%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE);
 }
 
-//TODO: find a way to eliminate the conditional
-Tile Map::get_tile(int x, int y) {
-    auto chunk = _chunks.find({x/32, y/32});
+//TODO: we can remove the conditional if the chunk is guaranteed to exist
+Chunk& Map::get_chunk(int x, int y) {
+    auto chunk = _chunks.find({x/CHUNK_SIZE, y/CHUNK_SIZE});
     if(chunk == _chunks.end()) {
-        load_chunk(x/32, y/32);
-        return _chunks[{x/32, y/32}]->_tiles[convert_position(x, y)];
-    } else {
-        return chunk->second->_tiles[convert_position(x, y)];
+        load_chunk(x/CHUNK_SIZE, y/CHUNK_SIZE);
+        return *_chunks[{x/CHUNK_SIZE, y/CHUNK_SIZE}];
     }
+    return *chunk->second;
+}
+
+Tile Map::get_tile(int x, int y) {
+    return get_chunk(x, y)._tiles[global_to_local(x, y)];
 }
 
 void Map::set_tile(int x, int y, Tile tile) {
-    auto chunk = _chunks.find({x/32, y/32});
-    if(chunk == _chunks.end()) {
-        load_chunk(x/32, y/32);
-        _chunks[{x/32, y/32}]->_tiles[convert_position(x, y)] = tile;
-    } else {
-        chunk->second->_tiles[convert_position(x, y)] = tile;
+    get_chunk(x, y)._tiles[global_to_local(x, y)] = tile;
+}
+
+void Map::add_robot(int x, int y, Robot *robot) {
+    get_chunk(x, y)._robots.push_back(robot);
+}
+
+Robot* Map::get_robot(int x, int y) {
+    for(auto robot : get_chunk(x, y)._robots) {
+        if(robot->_x == x && robot->_y == y) {
+            return robot;
+        }
+    }
+    return nullptr;
+}
+
+void Map::remove_robot(int x, int y) {
+    auto &chunk = get_chunk(x, y);
+    for(auto it = chunk._robots.begin();it != chunk._robots.end();it++) {
+        if((*it)->_x == x && (*it)->_y == y) {
+            free(*it);
+            chunk._robots.erase(it);
+            return;
+        }
+    }
+}
+
+//TODO: load and unload chunks depending on:
+//their robot count
+//neighbour robot count
+//currently this is a memory leak
+void Map::move_robot(Chunk &last_chunk, Robot *robot) {
+    for(auto it = last_chunk._robots.begin();it != last_chunk._robots.end();it++) {
+        if(*it == robot) {
+            last_chunk._robots.erase(it);
+            add_robot(robot->_x, robot->_y, *it);
+            return;
+        }
+    }
+}
+
+void Map::tick() {
+    //TODO: this can cause problems
+    //if we remove a robot
+    //then add a new robot
+    //and the pointer happens to be the same
+    //this completely blows up
+    std::unordered_set<Robot*> no_update_list;
+    for(auto chunk : _chunks) {
+        for(auto &robot : chunk.second->_robots) {
+            if(no_update_list.find(robot) != no_update_list.end()) {
+                continue;
+            }
+            robot->tick();
+            if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
+               robot->_y/CHUNK_SIZE != chunk.first[1]) {
+                move_robot(*chunk.second, robot);
+                no_update_list.insert(robot);
+            }
+        }
     }
 }
