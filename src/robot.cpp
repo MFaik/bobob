@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "code_runner.h"
+#include "game.h"
 
 extern Game g_game;
 extern CodeRunner g_code_runner;
@@ -36,24 +37,24 @@ inline std::array<int, 2> Robot::get_front() const {
 }
 
 void Robot::go_forward() {
+    //TODO: add bound checking
     auto [x, y] = get_front();
-    Object obj = g_game.get_obj(x, y);
-    if(obj == EMPTY) {
+    if(true) {
         _x = x;
         _y = y;
-        _input = g_game.get_tile(x, y);
+        _input = (int)g_game.get_tile(x, y)._type;
     } else {
-        _input = obj;
+        _input = 0;
     }
 }
 
 void Robot::look() {
     auto [x, y] = get_front();
-    Object obj = g_game.get_obj(x, y);
-    if(obj == EMPTY) {
-        _input = g_game.get_tile(x, y);
+    //TODO: add bound checking
+    if(true) {
+        _input = (int)g_game.get_tile(x, y)._type;
     } else {
-        _input = obj;
+        _input = 0;
     }
 }
 
@@ -68,25 +69,26 @@ void Robot::select(unsigned int i) {
 
 void Robot::use() {
     //TODO: the use function will be changed completely
+    //and use the health parameter
     switch(_inventory[_inventory_selector]) {
         case PATH_ITEM: {
-            g_game.set(_x, _y, PATH);
+            g_game.set_tile(_x, _y, {Tile::PATH, 0});
             break;
                    }
         case AXE: {
             auto [x, y] = get_front();
-            if(g_game.get_obj(x, y) == TREE) {
-                g_game.set(x, y, EMPTY);
+            if(g_game.get_tile(x, y)._type == Tile::TREE) {
+                g_game.set_tile(x, y, {Tile::GRASS, 0});
             }
             break;
                   }
         case PICKAXE: {
             auto [x, y] = get_front();
-            Object obj = g_game.get_obj(x, y);
-            if(obj == COAL_MINE) {
-                g_game.set(x, y, EMPTY);
-            } else if(obj == IRON_MINE) {
-                g_game.set(x, y, EMPTY);
+            auto tile = g_game.get_tile(x, y);
+            if(tile._type == Tile::COAL_MINE) {
+                g_game.set_tile(x, y, {Tile::STONE, 0});
+            } else if(tile._type == Tile::IRON_MINE) {
+                g_game.set_tile(x, y, {Tile::STONE, 0});
             }
             break;
                       }

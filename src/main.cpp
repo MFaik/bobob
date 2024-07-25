@@ -1,12 +1,9 @@
 #include "game.h"
-#include "code_runner.h"
 
 extern Game g_game;
-extern CodeRunner g_code_runner;
 
 int main() {
-    g_game.setup(6, 5);
-    g_code_runner.setup({
+    g_game.setup_code({
             0b10000101111111111111111111111111,//GO
             0b10000011111111100000000000000001,//TURN EAST
             0b10000101111111111111111111111111,//GO
@@ -16,9 +13,10 @@ int main() {
             }, {});
 
 
-    g_game.add_robot(3, 4);
-    Robot* robot = g_game.get_robot(3, 4);
+    g_game.add_robot(0, 0);
+    Robot* robot = g_game.get_robot(0, 0);
     g_game.draw();
+    //TODO: add the robot to chunk and tick the chunks 
     for(size_t i = 0;i < 6;i++) {
         robot->tick();   
         g_game.draw();

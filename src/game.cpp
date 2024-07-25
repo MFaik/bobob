@@ -2,49 +2,43 @@
 #include "robot.h"
 
 Game g_game;
+extern CodeRunner g_code_runner;
+extern Map g_map;
 
-void Game::setup(int x_size, int y_size) {
+void Game::setup_robots() {
     for(auto robot : _robots) {
         free(robot);
     }
     _robots.clear();
-    if(_tiles)
-        free(_tiles);
-    if(_objects)
-        free(_objects);
-    _x = x_size;
-    _y = y_size;
-    _tiles = (Tile*)calloc(_x*_y, sizeof(Tile));
-    _objects = (Object*)calloc(_x*_y, sizeof(Object));
 }
 
-
-void Game::set(int x, int y, Tile tile) {
-    _tiles[x+y*_x] = tile;
+void Game::setup_map() {
+    //TODO: this will probably take in a file name 
+    g_map.clean_chunks();
 }
-void Game::set(int x, int y, Object object) {
-    _objects[x+y*_x] = object;
+
+void Game::setup_code(std::vector<ins_t> code, std::vector<ins_t> labels) {
+    g_code_runner.setup(code, labels);
+}
+
+void Game::set_tile(int x, int y, Tile tile) {
+    g_map.set_tile(x, y, tile);
 }
 Tile Game::get_tile(int x, int y) {
-    return _tiles[x+y*_x];
+    return g_map.get_tile(x, y);
 }
-Object Game::get_obj(int x, int y) {
-    return _objects[x+y*_x];
-}
+
+//TODO: add proper way to use a camera
+//TODO: add screen clear or graphics
 void Game::draw() {
-    for(int y = 0;y < _y;y++) {
-        for(int x = 0;x < _x;x++) {
+    for(int y = -10;y < 10;y++) {
+        for(int x = -10;x < 10;x++) {
             Robot* r = get_robot(x, y);
             if(r) {
                 std::cout << 'R';
                 continue;
             }
-            Object o = get_obj(x, y);
-            if(o != EMPTY) {
-                ::draw(o);
-                continue;
-            }
-            ::draw(get_tile(x, y));
+            g_map.draw(x, y);
         }
         std::cout << std::endl;
     }
@@ -79,6 +73,10 @@ bool Game::remove_robot(int x, int y) {
     return false;
 }
 
+void Game::tick() {
+    //TODO: add tick function
+}
+
 Game::~Game() {
-    setup(0, 0);
+    //TODO does this even need to exist?
 }
