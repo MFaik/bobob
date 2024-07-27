@@ -12,8 +12,8 @@ void CodeRunner::setup(std::vector<ins_t> code, std::vector<ins_t> labels) {
 }
 
 void CodeRunner::tick(Robot &robot) {
-    robot._pointer %= _code.size();
-    ins_t ins = _code[robot._pointer];
+    robot._pc %= _code.size();
+    ins_t ins = _code[robot._pc];
 
     switch(ins>>op_shift) {
         case MOV:
@@ -55,18 +55,18 @@ void CodeRunner::tick(Robot &robot) {
             break;
         //Jumps have -1 to allow unconditional _pointer++;
         case JMP:
-            get_register(robot, Ptr) = 
+            get_register(robot, PC) = 
                 _labels[get_operand(robot, ins)%_labels.size()] - 1;
             break;
         case JEQ:
             if(!get_register(robot, Cond)) {
-                get_register(robot, Ptr) = 
+                get_register(robot, PC) = 
                     _labels[get_operand(robot, ins)%_labels.size()] - 1;
             }
             break;
         case JNE:
             if(get_register(robot, Cond)) {
-                get_register(robot, Ptr) = 
+                get_register(robot, PC) = 
                     _labels[get_operand(robot, ins)%_labels.size()] - 1;
             }
             break;
@@ -92,7 +92,7 @@ void CodeRunner::tick(Robot &robot) {
             //TODO: add better error handling
             std::cout << "unkown command" << std::endl;
     }
-    robot._pointer++;
+    robot._pc++;
 }
 
 int& CodeRunner::get_register(Robot &robot, Register reg) {
@@ -103,8 +103,8 @@ int& CodeRunner::get_register(Robot &robot, Register reg) {
             return robot._b;
         case Input:
             return robot._input;
-        case Ptr:
-            return robot._pointer;
+        case PC:
+            return robot._pc;
         case Cond:
             return robot._cond;
         case Sel:

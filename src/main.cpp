@@ -29,15 +29,12 @@ int main() {
     g_game.set_tile(0, 0, {Tile::IRON_MINE, 0});
     g_game.set_tile(0, 4, {Tile::IRON_MINE, 0});
 
-    g_game.add_robot(20, 20);
-    Robot *robot = g_game.get_robot(20, 20);
-    robot->_inventory[2] = PATH_ITEM;
-    g_game.add_robot(25, 20);
-    robot = g_game.get_robot(25, 20);
-    robot->_inventory[2] = PATH_ITEM;
-    g_game.add_robot(20, 25);
-    robot = g_game.get_robot(20, 25);
-    robot->_inventory[2] = PATH_ITEM;
+    std::array<Item, 16> inv{};
+    inv[2] = PATH_ITEM;
+
+    g_game.add_robot(20, 20, inv);
+    g_game.add_robot(25, 20, inv);
+    g_game.add_robot(20, 25, inv);
     
     auto last_update = sc::steady_clock::now();
     while(!WindowShouldClose()) {

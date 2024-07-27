@@ -39,6 +39,11 @@ void Game::add_robot(int x, int y) {
     map.add_robot(robot);
 }
 
+void Game::add_robot(int x, int y, std::array<Item, 16> inventory) {
+    Robot *robot = new Robot(x, y, inventory);
+    map.add_robot(robot);
+}
+
 Robot* Game::get_robot(int x, int y) {
     return map.get_robot(x, y);
 }

@@ -134,7 +134,6 @@ void Map::tick() {
                 continue;
             }
             robot->tick();
-            std::cout << robot->_pointer << ' ';
             if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
                robot->_y/CHUNK_SIZE != chunk.first[1]) {
                 move_robot(*chunk.second, robot);
@@ -142,5 +141,4 @@ void Map::tick() {
             }
         }
     }
-    std::cout << '\n';
 }

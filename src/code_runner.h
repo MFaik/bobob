@@ -46,7 +46,7 @@ private:
         A,
         B,
         Input,
-        Ptr,
+        PC,
         Cond,
         Sel,
     };

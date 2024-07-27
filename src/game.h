@@ -19,6 +19,7 @@ public:
     void draw();
 
     void add_robot(int x, int y);
+    void add_robot(int x, int y, std::array<Item, 16> inventory);
     Robot* get_robot(int x, int y);
     void remove_robot(int x, int y);
 
