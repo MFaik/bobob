@@ -3,11 +3,10 @@
 
 Game g_game;
 extern CodeRunner g_code_runner;
-extern Map g_map;
 
 void Game::setup_map() {
     //TODO: this will probably take in a file name 
-    g_map.clean_chunks();
+    map.clean_chunks();
 }
 
 void Game::setup_code(std::vector<ins_t> code, std::vector<ins_t> labels) {
@@ -15,44 +14,41 @@ void Game::setup_code(std::vector<ins_t> code, std::vector<ins_t> labels) {
 }
 
 void Game::set_tile(int x, int y, Tile tile) {
-    g_map.set_tile(x, y, tile);
+    map.set_tile(x, y, tile);
 }
 Tile Game::get_tile(int x, int y) {
-    return g_map.get_tile(x, y);
+    return map.get_tile(x, y);
 }
 
 //TODO: add proper way to use a camera
 //TODO: add screen clear or graphics
 void Game::draw() {
-    for(int y = -10;y < 10;y++) {
-        for(int x = -10;x < 10;x++) {
+    for(int y = 0;y < 100;y++) {
+        for(int x = 0;x < 100;x++) {
             Robot* r = get_robot(x, y);
             if(r) {
-                std::cout << 'R';
                 continue;
             }
-            g_map.draw(x, y);
+            map.draw(x, y);
         }
-        std::cout << std::endl;
     }
-    std::cout << std::endl;
 }
 
 void Game::add_robot(int x, int y) {
     Robot *robot = new Robot(x, y);
-    g_map.add_robot(x, y, robot);
+    map.add_robot(robot);
 }
 
 Robot* Game::get_robot(int x, int y) {
-    return g_map.get_robot(x, y);
+    return map.get_robot(x, y);
 }
 
 void Game::remove_robot(int x, int y) {
-    g_map.remove_robot(x, y);
+    map.remove_robot(x, y);
 }
 
 void Game::tick() {
-    g_map.tick();
+    map.tick();
 }
 
 Game::~Game() {

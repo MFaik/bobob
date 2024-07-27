@@ -34,7 +34,7 @@ CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS) -lraylib
 
 # Build step for C source
 $(BUILD_DIR)/%.c.o: %.c

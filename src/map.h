@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "util.h"
+#include "raylib.h"
 
 class Robot;
 
@@ -34,12 +35,12 @@ struct Chunk {
 };
 
 class Map {
+private:
     //TODO: just allocating chunks in heap may create
     //locality and fragmentation problems
     std::unordered_map<std::array<int, 2>, Chunk*> _chunks;
 
-    void draw(Tile::Type tile_type);
-private:
+    Color get_tile_color(Tile::Type tile_type);
     void load_chunk(int x, int y);
     void unload_chunk(int x, int y);
 public:
@@ -54,7 +55,7 @@ public:
     void set_tile(int x, int y, Tile tile);
 
 
-    void add_robot(int x, int y, Robot *robot);
+    void add_robot(Robot *robot);
     Robot* get_robot(int x, int y);
     void remove_robot(int x, int y);
     void move_robot(Chunk &last_chunk, Robot *robot);

@@ -9,8 +9,8 @@ class Robot;
 class Game {
 private:
     Map map;
-    Game(){}
 public:
+    Game(){}
     void setup_map();
     void setup_code(std::vector<ins_t> code, std::vector<ins_t> labels);
 

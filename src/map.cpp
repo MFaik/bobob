@@ -5,33 +5,27 @@
 
 Map g_map;
 
-void Map::draw(Tile::Type tile_type) {
+Color Map::get_tile_color(Tile::Type tile_type) {
     switch (tile_type) {
         case Tile::GRASS:
-            std::cout << ',';
-            break;
+            return GREEN;
         case Tile::STONE:
-            std::cout << '.';
-            break;
+            return DARKGRAY;
         case Tile::PATH:
-            std::cout << 'o';
-            break;
+            return DARKBROWN;
         case Tile::TREE:
-            std::cout << 'T';
-            break;
+            return DARKGREEN;
         case Tile::COAL_MINE:
-            std::cout << 'c';
-            break;
+            return BLACK;
         case Tile::IRON_MINE:
-            std::cout << 'i';
-            break;
+            return LIGHTGRAY;
         default:
-            std::cout << '?';
+            return PINK;
     }
 }
 
 void Map::draw(int x, int y) {
-    draw(get_tile(x, y)._type);
+    DrawRectangle(x*10, y*10, 10, 10, get_tile_color(get_tile(x, y)._type));
 }
 
 void Map::load_chunk(int chunk_x, int chunk_y) {
@@ -88,8 +82,8 @@ void Map::set_tile(int x, int y, Tile tile) {
     get_chunk(x, y)._tiles[global_to_local(x, y)] = tile;
 }
 
-void Map::add_robot(int x, int y, Robot *robot) {
-    get_chunk(x, y)._robots.push_back(robot);
+void Map::add_robot(Robot *robot) {
+    get_chunk(robot->_x, robot->_y)._robots.push_back(robot);
 }
 
 Robot* Map::get_robot(int x, int y) {
@@ -119,8 +113,8 @@ void Map::remove_robot(int x, int y) {
 void Map::move_robot(Chunk &last_chunk, Robot *robot) {
     for(auto it = last_chunk._robots.begin();it != last_chunk._robots.end();it++) {
         if(*it == robot) {
+            add_robot(*it);
             last_chunk._robots.erase(it);
-            add_robot(robot->_x, robot->_y, *it);
             return;
         }
     }
@@ -133,12 +127,14 @@ void Map::tick() {
     //and the pointer happens to be the same
     //this completely blows up
     std::unordered_set<Robot*> no_update_list;
+    no_update_list.clear();
     for(auto chunk : _chunks) {
         for(auto &robot : chunk.second->_robots) {
             if(no_update_list.find(robot) != no_update_list.end()) {
                 continue;
             }
             robot->tick();
+            std::cout << robot->_pointer << ' ';
             if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
                robot->_y/CHUNK_SIZE != chunk.first[1]) {
                 move_robot(*chunk.second, robot);
@@ -146,4 +142,5 @@ void Map::tick() {
             }
         }
     }
+    std::cout << '\n';
 }
