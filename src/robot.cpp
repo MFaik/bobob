@@ -8,7 +8,7 @@ extern CodeRunner g_code_runner;
 Robot::Robot(int x, int y) : _x(x), _y(y) {}
 
 Robot::Robot(int x, int y, std::array<Item, 16> inventory) :
-    _x(x), _y(y), _inventory(inventory) {}
+    _inventory(inventory), _x(x), _y(y) {}
 
 int Robot::get_parity() const {
     return _x%3+_y%3;

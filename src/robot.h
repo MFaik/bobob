@@ -27,7 +27,6 @@ enum Item {
 class Robot {
     friend class CodeRunner;
 private:
-
     std::array<Item, 16> _inventory;
 
     //registers
