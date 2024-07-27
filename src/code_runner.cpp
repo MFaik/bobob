@@ -59,13 +59,13 @@ void CodeRunner::tick(Robot &robot) {
                 _labels[get_operand(robot, ins)%_labels.size()] - 1;
             break;
         case JEQ:
-            if(get_register(robot, Cond)) {
+            if(!get_register(robot, Cond)) {
                 get_register(robot, Ptr) = 
                     _labels[get_operand(robot, ins)%_labels.size()] - 1;
             }
             break;
         case JNE:
-            if(!get_register(robot, Cond)) {
+            if(get_register(robot, Cond)) {
                 get_register(robot, Ptr) = 
                     _labels[get_operand(robot, ins)%_labels.size()] - 1;
             }
