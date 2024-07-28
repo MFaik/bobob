@@ -13,6 +13,10 @@ int Robot::get_parity() const {
     return _x%3+_y%3;
 }
 
+int& Robot::get_register(Register reg) {
+    return this->*Robot::regs[reg];
+}
+
 void Robot::turn(Direction dir) {
     if(dir >= 4) {
         _dir = (Direction)((_dir+(dir%4))%4);

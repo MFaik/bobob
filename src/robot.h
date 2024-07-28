@@ -53,6 +53,7 @@ public:
     int _x, _y;
     Direction _dir = NORTH;
     int get_parity() const;
+    int& get_register(Register reg);
 
     void turn(Direction dir);
 private:
@@ -66,4 +67,5 @@ public:
     void select(unsigned int i);
     void use();
     void sleep(unsigned int ticks);
+
 };
