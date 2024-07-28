@@ -11,7 +11,7 @@ ifneq ($(OS), Windows_NT)
         LIB_FLAGS := -lraylib
     endif
     ifeq ($(UNAME_S), Darwin) 
-        LIB_FLAGS := -lraylib -Llib/Mac/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo DYLD_FALLBACK_LIBRARY_PATH=lib/OSX/lib ./build/bobob 
+        LIB_FLAGS := -lraylib -Llib/Mac/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo ./build/bobob 
         LIB_INCLUDE := -Ilib/Mac/include 
     endif
 else
