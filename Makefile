@@ -4,7 +4,21 @@
 # https://stackoverflow.com/questions/2483182/recursive-wildcards-in-gnu-make
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
-TARGET_EXEC := bobob
+ifneq ($(OS), Windows_NT)
+    TARGET_EXEC := bobob
+	UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S), Linux)
+        LIB_FLAGS := -lraylib
+    endif
+    ifeq ($(UNAME_S), Darwin) 
+        LIB_FLAGS := -lraylib -Llib/OSX/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+        LIB_INCLUDE := -Ilib/OSX/include 
+    endif
+else
+	TARGET_EXEC := bobob
+    LIB_FLAGS := -lraylib -Llib/Win/lib -lopengl32 -lgdi32 -lwinmm 
+    LIB_INCLUDE := -Ilib/Win/include 
+endif
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src
@@ -26,26 +40,21 @@ DEPS := $(OBJS:.o=.d)
 # INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_DIRS := $(sort $(dir $(call rwildcard, $(SRC_DIRS), *.h)))
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+INC_FLAGS := $(addprefix -I,$(INC_DIRS)) $(LIB_INCLUDE)
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
 CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra
 
+
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS) -lraylib
-
-# Build step for C source
-$(BUILD_DIR)/%.c.o: %.c
-	mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS)
 
 # Build step for C++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-
 
 .PHONY: clean
 clean:
