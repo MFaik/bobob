@@ -33,9 +33,25 @@ private:
     int _inventory_selector = 0;
     int _cond = 0;
     int _a = 0, _b = 0, _input = 0, _pc = 0;
+
     unsigned int _sleep_dur = 0;
 public:
-    int _x, _y, _dir = NORTH;
+    enum Register {
+        A,
+        B,
+        PC,
+        Cond,
+        Input,
+        Sel,
+    };
+    constexpr static int Robot::* regs[6] = {
+        &Robot::_a, &Robot::_b,
+        &Robot::_pc, &Robot::_cond,
+        &Robot::_input, &Robot::_inventory_selector
+    };
+
+    int _x, _y;
+    Direction _dir = NORTH;
     int get_parity() const;
 
     void turn(Direction dir);

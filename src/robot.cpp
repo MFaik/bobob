@@ -16,7 +16,7 @@ int Robot::get_parity() const {
 
 void Robot::turn(Direction dir) {
     if(dir >= 4) {
-        _dir = (_dir+(dir%4))%4;
+        _dir = (Direction)((_dir+(dir%4))%4);
     } else {
         _dir = dir;
     }
@@ -32,12 +32,14 @@ inline std::array<int, 2> Robot::get_front() const {
             return {_x, _y+1};
         case EAST:
             return {_x+1, _y};
+        default:
+            //TODO: find a better way to throw errors
+            std::cout << "direction is incorrect";
     }
     return {_x, _y};
 }
 
 void Robot::go_forward() {
-    //TODO: add bound checking
     auto [x, y] = get_front();
     if(true) {
         _x = x;
@@ -50,7 +52,6 @@ void Robot::go_forward() {
 
 void Robot::look() {
     auto [x, y] = get_front();
-    //TODO: add bound checking
     if(true) {
         _input = (int)g_game.get_tile(x, y)._type;
     } else {

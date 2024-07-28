@@ -31,10 +31,12 @@ int main() {
 
     std::array<Item, 16> inv{};
     inv[2] = PATH_ITEM;
-
-    g_game.add_robot(20, 20, inv);
-    g_game.add_robot(25, 20, inv);
-    g_game.add_robot(20, 25, inv);
+    
+    for(int y = 11;y < 50;y++) {
+        for(int x = 1;x < 50;x++) {
+            g_game.add_robot(x, y, inv);
+        }
+    }
     
     auto last_update = sc::steady_clock::now();
     while(!WindowShouldClose()) {

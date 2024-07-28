@@ -42,15 +42,6 @@ private:
         SEL,
     };
 
-    enum Register {
-        A,
-        B,
-        Input,
-        PC,
-        Cond,
-        Sel,
-    };
-
     std::vector<ins_t> _code;
     std::vector<ins_t> _labels;
 public:
@@ -58,7 +49,7 @@ public:
 
     void tick(Robot &robot);
 
-    int& get_register(Robot &robot, Register reg);
+    int& get_register(Robot &robot, Robot::Register reg);
     inline int& get_assignee(Robot &robot, const ins_t ins);
     inline int get_operand(Robot &robot, const ins_t ins);
 };
