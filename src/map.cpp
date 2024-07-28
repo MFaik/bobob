@@ -2,8 +2,10 @@
 
 #include "map.h"
 #include "robot.h"
+#include "program.h"
+#include "game.h"
 
-Map g_map;
+extern Game g_game;
 
 Color Map::get_tile_color(Tile::Type tile_type) {
     switch (tile_type) {
@@ -135,7 +137,7 @@ void Map::tick() {
             if(no_update_list.find(robot) != no_update_list.end()) {
                 continue;
             }
-            robot->tick();
+            g_game.tick_robot(*robot);
             if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
                robot->_y/CHUNK_SIZE != chunk.first[1]) {
                 moved_robots.push_back(robot);

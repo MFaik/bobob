@@ -1,9 +1,8 @@
 #include "robot.h"
-#include "code_runner.h"
+#include "program.h"
 #include "game.h"
 
 extern Game g_game;
-extern CodeRunner g_code_runner;
 
 Robot::Robot(int x, int y) : _x(x), _y(y) {}
 
@@ -41,6 +40,7 @@ inline std::array<int, 2> Robot::get_front() const {
 
 void Robot::go_forward() {
     auto [x, y] = get_front();
+    //TODO: add collision
     if(true) {
         _x = x;
         _y = y;
@@ -100,11 +100,4 @@ void Robot::use() {
 
 void Robot::sleep(unsigned int ticks) {
     _sleep_dur = ticks;
-}
-
-void Robot::tick() {
-    if(_sleep_dur)
-        _sleep_dur--;
-    else
-        g_code_runner.tick(*this);
 }

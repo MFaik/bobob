@@ -2,13 +2,14 @@
 #include <vector>
 
 #include "map.h"
-#include "code_runner.h"
+#include "program.h"
 
 class Robot;
 
 class Game {
 private:
-    Map map;
+    Map _map;
+    Program _program;
 public:
     Game(){}
     void setup_map();
@@ -24,5 +25,6 @@ public:
     void remove_robot(int x, int y);
 
     void tick();
+    void tick_robot(Robot& robot);
     ~Game();
 };

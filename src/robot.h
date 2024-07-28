@@ -25,7 +25,7 @@ enum Item {
 };
 
 class Robot {
-    friend class CodeRunner;
+    friend class Program;
 private:
     std::array<Item, 16> _inventory;
 
@@ -66,5 +66,4 @@ public:
     void select(unsigned int i);
     void use();
     void sleep(unsigned int ticks);
-    void tick();
 };
