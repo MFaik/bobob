@@ -99,7 +99,6 @@ void Program::tick(Robot &robot) {
 
 int& Program::get_register(Robot &robot, Robot::Register reg) {
     return robot.get_register(reg);
-    return robot.*Robot::regs[reg];
 }
 
 int& Program::get_assignee(Robot &robot, const ins_t ins) {
