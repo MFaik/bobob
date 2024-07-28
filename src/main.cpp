@@ -32,8 +32,8 @@ int main() {
     std::array<Item, 16> inv{};
     inv[2] = PATH_ITEM;
     
-    for(int y = 11;y < 50;y++) {
-        for(int x = 1;x < 50;x++) {
+    for(int y = 11;y < 500;y++) {
+        for(int x = 1;x < 500;x++) {
             g_game.add_robot(x, y, inv);
         }
     }

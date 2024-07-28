@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 
-enum Direction {
+enum Direction : char {
     NORTH,
     EAST,
     SOUTH,
@@ -13,7 +13,7 @@ enum Direction {
 };
 
 //TODO: create an items file
-enum Item {
+enum Item : char {
     NONE,
     WOOD,
     COAL,
@@ -52,7 +52,8 @@ public:
 
     int _x, _y;
     Direction _dir = NORTH;
-    int get_parity() const;
+    int _tick_parity = 0;
+    int get_tile_parity() const;
     int& get_register(Register reg);
 
     void turn(Direction dir);
@@ -67,5 +68,4 @@ public:
     void select(unsigned int i);
     void use();
     void sleep(unsigned int ticks);
-
 };

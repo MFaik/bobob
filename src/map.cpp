@@ -1,8 +1,5 @@
-#include <unordered_set>
-
 #include "map.h"
 #include "robot.h"
-#include "program.h"
 #include "game.h"
 
 extern Game g_game;
@@ -123,28 +120,21 @@ void Map::move_robot(Chunk &last_chunk, Robot *robot) {
 }
 
 void Map::tick() {
-    //TODO: this can cause problems
-    //if we remove a robot
-    //then add a new robot
-    //and the pointer happens to be the same
-    //this completely blows up
-    //TODO: profile this code
-    std::unordered_set<Robot*> no_update_list;
-    no_update_list.clear();
+    static int tick_parity = 1;
     for(auto chunk : _chunks) {
-        std::vector<Robot*> moved_robots;
-        for(auto &robot : chunk.second->_robots) {
-            if(no_update_list.find(robot) != no_update_list.end()) {
-                continue;
+        for(size_t i = 0;i < chunk.second->_robots.size();) {
+            auto robot = chunk.second->_robots[i];
+            if(robot->_tick_parity != tick_parity) {
+                g_game.tick_robot(*robot);
+                robot->_tick_parity = tick_parity;
             }
-            g_game.tick_robot(*robot);
             if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
-               robot->_y/CHUNK_SIZE != chunk.first[1]) {
-                moved_robots.push_back(robot);
-                no_update_list.insert(robot);
+                    robot->_y/CHUNK_SIZE != chunk.first[1]) {
+                move_robot(*chunk.second, robot);
+            } else {
+                i++;
             }
         }
-        for(auto robot : moved_robots)
-            move_robot(*chunk.second, robot);
     }
+    tick_parity = !tick_parity;
 }

@@ -16,7 +16,7 @@ ifneq ($(OS), Windows_NT)
     endif
 else
 	TARGET_EXEC := bobob
-    LIB_FLAGS := -lraylib -Llib/Win/lib -lopengl32 -lgdi32 -lwinmm 
+    LIB_FLAGS := -lraylib -Llib/Win/lib -lopengl32 -lgdi32 -lwinmm
     LIB_INCLUDE := -Ilib/Win/include 
 endif
 
@@ -44,12 +44,13 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS)) $(LIB_INCLUDE)
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra
+CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra -std=c++23
 
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS)
+		
 
 # Build step for C++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
