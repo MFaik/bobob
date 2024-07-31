@@ -3,28 +3,24 @@
 #include <raylib.h>
 
 #include "game.h"
+#include "program_parser.h"
 extern Game g_game;
 
 namespace sc = std::chrono;
 
 int main() {
-    InitWindow(600, 600, "bobob");
+    auto prog = parse_program("SEL 2a\nMOV A 0\nlabel0:\nUSE\nGO\nADD A 1\nCMP A 10\n JNE label0\nTURN RIGHT");
+    g_game.setup_program(prog);
 
-    std::vector<unsigned> code = {
-        0b10001011111111100000000000000010,//SEL 2
-        0b00000000000000000000000000000000,//MOV a 0
-        //LABEL0
-        0b10001001111111111111111111111111,//USE
-        0b10000101111111111111111111111111,//GO
-        0b00000010000000000000000000000001,//ADD a 1
-        0b00010110000000000000000000001010,//COMP a 10
-        0b00011101111111100000000000000000,//JNE 0
-        0b10000011111111100000000000000101,//TURN RIGHT
-    };
-    std::vector<unsigned> labels = {
-        2,
-    };
-    g_game.setup_code(code, labels);
+    for(auto e : prog._errors) {
+        std::cout << e.txt << std::endl;
+    }
+
+    if(prog._errors.size()) {
+        return 1;
+    }
+
+    InitWindow(600, 600, "bobob");
 
     g_game.set_tile(0, 0, {Tile::IRON_MINE, 0});
     g_game.set_tile(0, 4, {Tile::IRON_MINE, 0});

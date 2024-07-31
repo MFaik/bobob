@@ -2,22 +2,15 @@
 
 #include "program.h"
 
-void Program::setup(std::vector<ins_t> code, std::vector<ins_t> labels) {
-    // _code = code;
-    // _labels = labels;
-    swap(code, _code);
-    swap(labels, _labels);
-}
-
 void Program::tick(Robot &robot) {
     if(robot._sleep_dur) {
         robot._sleep_dur--;
         return;
     }
     robot._pc %= _code.size();
-    ins_t ins = _code[robot._pc];
+    Instruction ins = _code[robot._pc];
     
-    switch(ins>>op_shift) {
+    switch(ins.op) {
         case MOV:
             get_assignee(robot, ins) = get_operand(robot, ins);
             break;
@@ -47,9 +40,6 @@ void Program::tick(Robot &robot) {
             break;
         case XOR:
             get_assignee(robot, ins) ^= get_operand(robot, ins);
-            break;
-        case NOR:
-            get_assignee(robot, ins) |= ~get_operand(robot, ins);
             break;
         case CMP:
             get_register(robot, Robot::Cond) = 
@@ -101,17 +91,14 @@ int& Program::get_register(Robot &robot, Robot::Register reg) {
     return robot.get_register(reg);
 }
 
-int& Program::get_assignee(Robot &robot, const ins_t ins) {
-    auto reg = (Robot::Register)
-        ((ins >> (constant_bit_len+1)) & ((1<<register_bit_len)-1));
-    return get_register(robot, reg);
+int& Program::get_assignee(Robot &robot, const Instruction ins) {
+    return get_register(robot, ins.reg);
 }
 
-int Program::get_operand(Robot &robot, const ins_t ins) {
-    if(ins & (1<<operand_toggle_bit)) {
-        auto reg = (Robot::Register)(ins&((1<<register_bit_len)-1));
-        return get_register(robot, reg);
+int Program::get_operand(Robot &robot, const Instruction ins) {
+    if(ins.register_toggle) {
+        return get_register(robot, (Robot::Register)ins.operand);
     } else {
-        return ins & ((1<<constant_bit_len)-1);
+        return ins.operand;
     }
 }

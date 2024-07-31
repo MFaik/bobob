@@ -13,7 +13,7 @@ private:
 public:
     Game(){}
     void setup_map();
-    void setup_code(std::vector<ins_t> code, std::vector<ins_t> labels);
+    void setup_program(Program program);
 
     void set_tile(int x, int y, Tile tile);
     Tile get_tile(int x, int y);

@@ -1,24 +1,12 @@
 #pragma once
 #include <vector>
-#include <stdint.h>
+#include <string>
 
 #include "robot.h"
 
-typedef uint32_t ins_t;
-
 class Program {
-private:
-    //ooooooorrrrrrrrtcccccccccccccccc
-    //12345671234567811234567890123456
-    //o-> operation, r -> register aka assignee 
-    //c-> constant/register aka operand, t-> register toggle
-
-    static constexpr int op_shift = 25;
-    static constexpr int operand_toggle_bit = 16;
-    static constexpr int register_bit_len = 8;
-    static constexpr int constant_bit_len = 16;
-
-    enum Instruction {
+public:
+    enum Operation {
         MOV,
         ADD,
         SUB,
@@ -29,7 +17,6 @@ private:
         AND,
         OR,
         XOR,
-        NOR,
         CMP,
         JMP,
         JEQ,
@@ -41,15 +28,28 @@ private:
         USE,
         SEL,
     };
+    //TODO: rename this "operand" and "reg" to something else
+    struct Instruction {
+        int operand : 16;
+        bool register_toggle : 1;
+        Robot::Register reg : 8;
+        Operation op : 7;
 
-    std::vector<ins_t> _code;
-    std::vector<ins_t> _labels;
+        Instruction(){}
+    };
+    struct Error {
+        int line;
+        std::string txt;
+    };
+//TODO: removing this private is hacky
+//private:
+    std::vector<Instruction> _code;
+    std::vector<unsigned int> _labels;
+    std::vector<Error> _errors;
 public:
-    void setup(std::vector<ins_t> code, std::vector<ins_t> labels);
-
     void tick(Robot &robot);
 
     int& get_register(Robot &robot, Robot::Register reg);
-    inline int& get_assignee(Robot &robot, const ins_t ins);
-    inline int get_operand(Robot &robot, const ins_t ins);
+    int& get_assignee(Robot &robot, Instruction ins);
+    int get_operand(Robot &robot, Instruction ins);
 };

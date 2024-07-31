@@ -8,8 +8,9 @@ void Game::setup_map() {
     _map.clean_chunks();
 }
 
-void Game::setup_code(std::vector<ins_t> code, std::vector<ins_t> labels) {
-    _program.setup(code, labels);
+//TODO: find a better way to do this
+void Game::setup_program(Program program) {
+    std::swap(_program, program);
 }
 
 void Game::set_tile(int x, int y, Tile tile) {
