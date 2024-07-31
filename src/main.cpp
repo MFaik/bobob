@@ -9,7 +9,7 @@ extern Game g_game;
 namespace sc = std::chrono;
 
 int main() {
-    auto prog = parse_program("SEL 2a\nMOV A 0\nlabel0:\nUSE\nGO\nADD A 1\nCMP A 10\n JNE label0\nTURN RIGHT");
+    auto prog = parse_program("SEL 2\nMOV A 0\nlabel0:\nUSE\nGO\nADD A 1\nCMP A 10\n JNE label0\nTURN RIGHT");
     g_game.setup_program(prog);
 
     for(auto e : prog._errors) {

@@ -187,7 +187,8 @@ Program parse_program(std::string str) {
             if(oc >= 1) {
                 if(l == r)
                     throw std::runtime_error(oc == 2 ? "expected two operands" : "expected one operand");
-
+                
+                bool isnum = true;
                 for(int i = l;i <= r;i++) {
                     if(isspace(line[i]) || i == r) {
                         std::string o = line.substr(l, i-l);
@@ -197,7 +198,7 @@ Program parse_program(std::string str) {
                             ins.operand = reg->second;
                         } else {
                             ins.register_toggle = false;
-                            if(isdigit(line[l])) {
+                            if(isnum) {
                                 try {
                                     ins.operand = stoi(o);
                                 } catch(...) {
@@ -211,6 +212,8 @@ Program parse_program(std::string str) {
                             }
                         }
                         break;
+                    } else {
+                        isnum &= isdigit(line[i]);
                     }
                 }
             }
