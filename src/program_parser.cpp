@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -76,6 +75,10 @@ const std::unordered_map<Program::Operation, int> operand_cnt = {
     {Program::SEL, 1},
 };
 
+struct ProgramError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 //TODO: add error handling
 Program parse_program(std::string str) {
     //the code must be all caps
@@ -89,8 +92,7 @@ Program parse_program(std::string str) {
     
     int line_cnt = -1;
     int code_cnt = 0;
-    //parse the labels first 
-    //to allow forward jumps
+    //parse the labels first to allow forward jumps
     while(std::getline(f, line)) {
         line_cnt++;
         try{
@@ -106,23 +108,23 @@ Program parse_program(std::string str) {
 
             if(line[r-1] == ':') {
                 if(r-l == 1)
-                    throw std::runtime_error("label cannot be empty");
+                    throw ProgramError("label cannot be empty");
                 std::string label = line.substr(l, r-l);
                 if(label.find(' ') != std::string::npos)
-                    throw std::runtime_error("label cannot have spaces: " + label);
+                    throw ProgramError("label cannot have spaces: " + label);
                 if(constant_map.find(label) != constant_map.end())
-                    throw std::runtime_error("label cannot have the same name as a constant: " + label);
+                    throw ProgramError("label cannot have the same name as a constant: " + label);
                 if(reg_map.find(label) != reg_map.end())
-                    throw std::runtime_error("label cannot have the same name as a register: " + label);
+                    throw ProgramError("label cannot have the same name as a register: " + label);
                 if(label_map.find(label) != label_map.end())
-                    throw std::runtime_error("two labels cannot have the same name: " + label);
+                    throw ProgramError("two labels cannot have the same name: " + label);
 
                 label_map[line.substr(l, r-l-1)] = ret._labels.size();
                 ret._labels.push_back(code_cnt);
             } else {
                 code_cnt++;
             }
-        } catch(const std::runtime_error &err) {
+        } catch(const ProgramError &err) {
             ret._errors.push_back({
                 line_cnt,
                 err.what(),
@@ -158,7 +160,7 @@ Program parse_program(std::string str) {
                 if(isspace(line[i]) || i == r) {
                     auto op = op_map.find(line.substr(l, i-l));
                     if(op == op_map.end()) {
-                        throw std::runtime_error("unkown op: " + line.substr(l, i-l));
+                        throw ProgramError("unkown op: " + line.substr(l, i-l));
                     }
                     ins.op = op->second;
                     l = i;
@@ -169,13 +171,13 @@ Program parse_program(std::string str) {
             int oc = operand_cnt.at(ins.op);
             if(oc == 2) {
                 if(l == r) {
-                    throw std::runtime_error("expected two operands");
+                    throw ProgramError("expected two operands");
                 }
                 for(int i = l;i <= r;i++) {
                     if(isspace(line[i]) || i == r) {
                         auto reg = reg_map.find(line.substr(l, i-l));
                         if(reg == reg_map.end())
-                            throw std::runtime_error("unkown register: " + line.substr(l, i-l));
+                            throw ProgramError("unkown register: " + line.substr(l, i-l));
 
                         ins.reg = reg->second;
                         l = i;
@@ -186,7 +188,7 @@ Program parse_program(std::string str) {
             while(l < r && isspace(line[l]))l++;
             if(oc >= 1) {
                 if(l == r)
-                    throw std::runtime_error(oc == 2 ? "expected two operands" : "expected one operand");
+                    throw ProgramError(oc == 2 ? "expected two operands" : "expected one operand");
                 
                 bool isnum = true;
                 for(int i = l;i <= r;i++) {
@@ -202,12 +204,12 @@ Program parse_program(std::string str) {
                                 try {
                                     ins.operand = stoi(o);
                                 } catch(...) {
-                                    throw std::runtime_error("invalid operand: " + o);
+                                    throw ProgramError("invalid operand: " + o);
                                 }
                             } else {
                                 auto c = constant_map.find(o);
                                 if(c == constant_map.end())
-                                    throw std::runtime_error("invalid operand: " + o);
+                                    throw ProgramError("invalid operand: " + o);
                                 ins.operand = c->second;
                             }
                         }
@@ -224,7 +226,7 @@ Program parse_program(std::string str) {
                     if(isspace(i) || i == r) {
                         auto label = label_map.find(line.substr(l, r-l));
                         if(label == label_map.end()) 
-                            throw std::runtime_error("unknown label: " + line.substr(l, r-l));
+                            throw ProgramError("unknown label: " + line.substr(l, r-l));
 
                         ins.operand = label->second;
                         break;
@@ -233,7 +235,7 @@ Program parse_program(std::string str) {
             }
 
             ret._code.push_back(ins);
-        } catch(const std::runtime_error &err) {
+        } catch(const ProgramError &err) {
             ret._errors.push_back({
                 line_cnt,
                 err.what(),
