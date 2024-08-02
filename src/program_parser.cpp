@@ -154,7 +154,6 @@ Program parse_program(std::string str) {
             }
 
             Program::Instruction ins;
-            *((int*)((void*)&ins)) = -1;
 
             for(int i = l;i <= r;i++) {
                 if(isspace(line[i]) || i == r) {
