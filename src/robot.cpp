@@ -43,13 +43,14 @@ inline std::array<int, 2> Robot::get_front() const {
 
 void Robot::go_forward() {
     auto [x, y] = get_front();
-    //TODO: add collision
-    if(true) {
+    if(!g_game.get_tile(x, y)._robot) {
+        g_game.get_tile(x, y)._robot = nullptr;
         _x = x;
         _y = y;
         _input = (int)g_game.get_tile(x, y)._type;
     } else {
-        _input = 0;
+        //TODO: add proper input id for objects and robot
+        _input = 999;
     }
 }
 
@@ -74,28 +75,24 @@ void Robot::select(unsigned int i) {
 void Robot::use() {
     //TODO: the use function will be changed completely
     //and use the health parameter
+    auto [x, y] = get_front();
+    auto &tile = g_game.get_tile(x, y);
     switch(_inventory[_inventory_selector]) {
-        case PATH_ITEM: {
-            g_game.set_tile(_x, _y, {Tile::PATH, 0});
+        case PATH_ITEM:
+            tile._type = Tile::PATH;
             break;
-                   }
-        case AXE: {
-            auto [x, y] = get_front();
-            if(g_game.get_tile(x, y)._type == Tile::TREE) {
-                g_game.set_tile(x, y, {Tile::GRASS, 0});
+        case AXE:
+            if(tile._type == Tile::TREE) {
+                tile._type = Tile::GRASS;
             }
             break;
-                  }
-        case PICKAXE: {
-            auto [x, y] = get_front();
-            auto tile = g_game.get_tile(x, y);
+        case PICKAXE:
             if(tile._type == Tile::COAL_MINE) {
-                g_game.set_tile(x, y, {Tile::STONE, 0});
+                tile._type = Tile::STONE;
             } else if(tile._type == Tile::IRON_MINE) {
-                g_game.set_tile(x, y, {Tile::STONE, 0});
+                tile._type = Tile::STONE;
             }
             break;
-                      }
         default:
             break;
     }

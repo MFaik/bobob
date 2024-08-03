@@ -10,13 +10,14 @@ class Game {
 private:
     Map _map;
     Program _program;
+    Camera2D _camera;
+    std::vector<Robot*> _robots;
 public:
-    Game(){}
+    Game();
     void setup_map();
     void setup_program(Program program);
 
-    void set_tile(int x, int y, Tile tile);
-    Tile get_tile(int x, int y);
+    Tile& get_tile(int x, int y);
     void draw();
 
     void add_robot(int x, int y);
@@ -25,6 +26,8 @@ public:
     void remove_robot(int x, int y);
 
     void tick();
+    void fixed_tick();
+    //TODO: find a way to remove this
     void tick_robot(Robot& robot);
     ~Game();
 };

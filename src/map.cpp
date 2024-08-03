@@ -7,13 +7,13 @@ extern Game g_game;
 Color Map::get_tile_color(Tile::Type tile_type) {
     switch (tile_type) {
         case Tile::GRASS:
-            return GREEN;
+            return DARKGREEN;
         case Tile::STONE:
             return DARKGRAY;
         case Tile::PATH:
             return DARKBROWN;
         case Tile::TREE:
-            return DARKGREEN;
+            return BROWN;
         case Tile::COAL_MINE:
             return BLACK;
         case Tile::IRON_MINE:
@@ -30,31 +30,18 @@ void Map::draw(int x, int y) {
 void Map::load_chunk(int chunk_x, int chunk_y) {
     //TODO: this will probably have some async file read
     //and/or procedural generation thing
-    auto chunk = _chunks.find({chunk_x, chunk_y});
-    if(chunk == _chunks.end()) {
-        _chunks[{chunk_x, chunk_y}] = (Chunk*)calloc(1, sizeof(Chunk));
-    }
+    
 }
 
 //TODO: we can remove the conditional if the chunk is guaranteed to exist
 void Map::unload_chunk(int chunk_x, int chunk_y) {
     auto chunk = _chunks.find({chunk_x, chunk_y});
     if(chunk != _chunks.end()) {
-        for(auto robot : chunk->second->_robots) {
-            free(robot);
-        }
-        free(chunk->second);
         _chunks.erase(chunk);
     }
 }
 
 void Map::clean_chunks() {
-    for(auto &chunk : _chunks) {
-        for(auto robot : chunk.second->_robots) {
-            free(robot);
-        }
-        free(chunk.second);
-    }
     _chunks.clear();
 }
 
@@ -65,76 +52,38 @@ inline int Map::global_to_local(int x, int y) {
 
 //TODO: we can remove the conditional if the chunk is guaranteed to exist
 Chunk& Map::get_chunk(int x, int y) {
+    if(x%CHUNK_SIZE && x < 0)
+        x-=CHUNK_SIZE-1;
+    if(y%CHUNK_SIZE && y < 0)
+        y-=CHUNK_SIZE-1;
     auto chunk = _chunks.find({x/CHUNK_SIZE, y/CHUNK_SIZE});
     if(chunk == _chunks.end()) {
         load_chunk(x/CHUNK_SIZE, y/CHUNK_SIZE);
-        return *_chunks[{x/CHUNK_SIZE, y/CHUNK_SIZE}];
+        return _chunks[{x/CHUNK_SIZE, y/CHUNK_SIZE}];
     }
-    return *chunk->second;
+    return chunk->second;
 }
 
-Tile Map::get_tile(int x, int y) {
+Tile& Map::get_tile(int x, int y) {
     return get_chunk(x, y)._tiles[global_to_local(x, y)];
 }
 
-void Map::set_tile(int x, int y, Tile tile) {
-    get_chunk(x, y)._tiles[global_to_local(x, y)] = tile;
-}
-
 void Map::add_robot(Robot *robot) {
-    get_chunk(robot->_x, robot->_y)._robots.push_back(robot);
-}
-
-Robot* Map::get_robot(int x, int y) {
-    for(auto robot : get_chunk(x, y)._robots) {
-        if(robot->_x == x && robot->_y == y) {
-            return robot;
-        }
-    }
-    return nullptr;
+    get_tile(robot->_x, robot->_y)._robot = robot;
 }
 
 void Map::remove_robot(int x, int y) {
-    auto &chunk = get_chunk(x, y);
-    for(auto it = chunk._robots.begin();it != chunk._robots.end();it++) {
-        if((*it)->_x == x && (*it)->_y == y) {
-            free(*it);
-            chunk._robots.erase(it);
-            return;
-        }
-    }
+    get_tile(x, y)._robot = nullptr;
+}
+
+Robot* Map::get_robot(int x, int y) {
+    return get_tile(x, y)._robot;
 }
 
 //TODO: load and unload chunks depending on:
 //their robot count
 //neighbour robot count
 //currently this is a memory leak
-void Map::move_robot(Chunk &last_chunk, Robot *robot) {
-    for(auto it = last_chunk._robots.begin();it != last_chunk._robots.end();it++) {
-        if(*it == robot) {
-            add_robot(*it);
-            last_chunk._robots.erase(it);
-            return;
-        }
-    }
-}
-
 void Map::tick() {
-    static int tick_parity = 1;
-    for(auto chunk : _chunks) {
-        for(size_t i = 0;i < chunk.second->_robots.size();) {
-            auto robot = chunk.second->_robots[i];
-            if(robot->_tick_parity != tick_parity) {
-                g_game.tick_robot(*robot);
-                robot->_tick_parity = tick_parity;
-            }
-            if(robot->_x/CHUNK_SIZE != chunk.first[0] ||
-                    robot->_y/CHUNK_SIZE != chunk.first[1]) {
-                move_robot(*chunk.second, robot);
-            } else {
-                i++;
-            }
-        }
-    }
-    tick_parity = !tick_parity;
+
 }

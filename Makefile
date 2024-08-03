@@ -49,13 +49,13 @@ CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra -std=c++23
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS) -O3
 		
 
 # Build step for C++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ -O3
 
 .PHONY: clean
 clean:

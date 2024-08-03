@@ -21,24 +21,29 @@ public:
         IRON_MINE,
     } _type;
     int _health = 0;
+    Robot* _robot = 0;
 };
-
 
 constexpr int CHUNK_SIZE = 32;
 
 struct Chunk {
-    Tile _tiles[CHUNK_SIZE*CHUNK_SIZE];
+    Tile *_tiles;
     
-    //TODO: just allocating robots in heap may create
-    //locality and fragmentation problems
-    std::vector<Robot*> _robots;
+    Chunk() {
+        _tiles = (Tile*)calloc(CHUNK_SIZE*CHUNK_SIZE, sizeof(Tile));
+    }
+    Chunk& operator=(const Chunk& c) = delete;
+    Chunk& operator=(Chunk&& c) = delete;
+    ~Chunk() {
+        free(_tiles); 
+    }
 };
 
 class Map {
 private:
     //TODO: just allocating chunks in heap may create
     //locality and fragmentation problems
-    std::unordered_map<std::array<int, 2>, Chunk*> _chunks;
+    std::unordered_map<std::array<int, 2>, Chunk> _chunks;
 
     Color get_tile_color(Tile::Type tile_type);
     void load_chunk(int x, int y);
@@ -51,14 +56,11 @@ private:
     Chunk& get_chunk(int x, int y);
 public:
     void draw(int x, int y);
-    Tile get_tile(int x, int y);
-    void set_tile(int x, int y, Tile tile);
-
+    Tile& get_tile(int x, int y);
 
     void add_robot(Robot *robot);
-    Robot* get_robot(int x, int y);
     void remove_robot(int x, int y);
-    void move_robot(Chunk &last_chunk, Robot *robot);
+    Robot* get_robot(int x, int y);
 
     void tick();
 };
