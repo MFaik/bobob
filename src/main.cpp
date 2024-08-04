@@ -1,12 +1,8 @@
-#include <chrono>
-
 #include <raylib.h>
 
 #include "game.h"
 #include "program_parser.h"
 extern Game g_game;
-
-namespace sc = std::chrono;
 
 int main() {
     auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT 999\nJEQ go_retry\nADD A 1\nCMP A 50\n JNE loop\nTURN RIGHT");
@@ -34,6 +30,7 @@ int main() {
     }
 
     InitWindow(GetScreenWidth(), GetScreenHeight(), "bobob");
+    ToggleFullscreen();
     SetTargetFPS(60);
     
     while(!WindowShouldClose()) {
