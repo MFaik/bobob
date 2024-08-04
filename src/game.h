@@ -6,7 +6,6 @@
 #include "arena_allocator.h"
 
 class Robot;
-template class ArenaAllocator<Robot>;
 
 class Game {
 private:

@@ -25,8 +25,8 @@ enum Item : char {
 };
 
 class Robot {
-    friend class Program;
 private:
+    friend class Program;
     std::array<Item, 16> _inventory;
 
     //registers
