@@ -3,15 +3,18 @@
 
 #include "map.h"
 #include "program.h"
+#include "arena_allocator.h"
 
 class Robot;
+template class ArenaAllocator<Robot>;
 
 class Game {
 private:
     Map _map;
     Program _program;
     Camera2D _camera;
-    std::vector<Robot*> _robots;
+    ArenaAllocator<Robot> _robot_allocator;
+    std::vector<ArenaPointer<Robot>> _robots;
 public:
     Game();
     void setup_map();
@@ -27,7 +30,5 @@ public:
 
     void tick();
     void fixed_tick();
-    //TODO: find a way to remove this
-    void tick_robot(Robot& robot);
     ~Game();
 };

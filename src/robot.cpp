@@ -44,7 +44,6 @@ inline std::array<int, 2> Robot::get_front() const {
 void Robot::go_forward() {
     auto [x, y] = get_front();
     if(!g_game.get_tile(x, y)._robot) {
-        g_game.get_tile(x, y)._robot = nullptr;
         _x = x;
         _y = y;
         _input = (int)g_game.get_tile(x, y)._type;

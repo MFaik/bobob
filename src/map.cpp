@@ -51,6 +51,10 @@ inline int Map::global_to_local(int x, int y) {
 }
 
 //TODO: we can remove the conditional if the chunk is guaranteed to exist
+//TODO: load and unload chunks depending on:
+//their robot count
+//neighbour robot count
+//currently this is a memory leak
 Chunk& Map::get_chunk(int x, int y) {
     if(x%CHUNK_SIZE && x < 0)
         x-=CHUNK_SIZE-1;
@@ -68,22 +72,18 @@ Tile& Map::get_tile(int x, int y) {
     return get_chunk(x, y)._tiles[global_to_local(x, y)];
 }
 
-void Map::add_robot(Robot *robot) {
-    get_tile(robot->_x, robot->_y)._robot = robot;
+void Map::add_robot(int x, int y, ArenaPointer<Robot> robot) {
+    get_tile(x, y)._robot = robot;
 }
 
 void Map::remove_robot(int x, int y) {
-    get_tile(x, y)._robot = nullptr;
+    get_tile(x, y)._robot = ArenaPointer<Robot>();
 }
 
-Robot* Map::get_robot(int x, int y) {
+ArenaPointer<Robot> Map::get_robot(int x, int y) {
     return get_tile(x, y)._robot;
 }
 
-//TODO: load and unload chunks depending on:
-//their robot count
-//neighbour robot count
-//currently this is a memory leak
 void Map::tick() {
 
 }

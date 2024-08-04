@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "arena_allocator.h"
+
 #include "util.h"
 #include "raylib.h"
 
@@ -21,7 +23,7 @@ public:
         IRON_MINE,
     } _type;
     int _health = 0;
-    Robot* _robot = 0;
+    ArenaPointer<Robot> _robot;
 };
 
 constexpr int CHUNK_SIZE = 32;
@@ -58,9 +60,9 @@ public:
     void draw(int x, int y);
     Tile& get_tile(int x, int y);
 
-    void add_robot(Robot *robot);
+    void add_robot(int x, int y, ArenaPointer<Robot> r);
     void remove_robot(int x, int y);
-    Robot* get_robot(int x, int y);
+    ArenaPointer<Robot> get_robot(int x, int y);
 
     void tick();
 };
