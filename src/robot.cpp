@@ -12,7 +12,7 @@ int Robot::get_tile_parity() const {
     return _x%3+_y%3;
 }
 
-int& Robot::get_register(Register reg) {
+unsigned int& Robot::get_register(Register reg) {
     return this->*Robot::regs[reg];
 }
 

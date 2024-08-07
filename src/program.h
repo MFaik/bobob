@@ -7,6 +7,7 @@
 class Program {
 public:
     enum Operation {
+        NOP,
         MOV,
         ADD,
         SUB,
@@ -49,7 +50,7 @@ public:
 public:
     void tick(Robot &robot);
 
-    int& get_register(Robot &robot, Robot::Register reg);
-    int& get_assignee(Robot &robot, Instruction ins);
-    int get_operand(Robot &robot, Instruction ins);
+    unsigned int& get_register(Robot &robot, Robot::Register reg);
+    unsigned int& get_assignee(Robot &robot, Instruction ins);
+    unsigned int get_operand(Robot &robot, Instruction ins);
 };

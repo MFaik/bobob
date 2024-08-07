@@ -35,7 +35,7 @@ public:
 
 //this only works for trivial types that can be 
 //malloc, memset and memcpy
-template<typename T> 
+template<typename T>
 class ArenaAllocator {
 private:
     T* _arena;

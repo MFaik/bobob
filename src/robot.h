@@ -30,9 +30,10 @@ private:
     std::array<Item, 16> _inventory;
 
     //registers
-    int _inventory_selector = 0;
-    int _cond = 0;
-    int _a = 0, _b = 0, _input = 0, _pc = 0;
+    unsigned int _inventory_selector = 0;
+    unsigned int _cond = 0;
+    unsigned int _a = 0, _b = 0, _input = 0;
+    unsigned int _pc = 0;
 
     unsigned int _sleep_dur = 0;
 public:
@@ -44,7 +45,7 @@ public:
         Input,
         Sel,
     };
-    constexpr static int Robot::* regs[6] = {
+    constexpr static unsigned int Robot::* regs[6] = {
         &Robot::_a, &Robot::_b,
         &Robot::_pc, &Robot::_cond,
         &Robot::_input, &Robot::_inventory_selector
@@ -54,7 +55,7 @@ public:
     Direction _dir = NORTH;
     int _tick_parity = 0;
     int get_tile_parity() const;
-    int& get_register(Register reg);
+    unsigned int& get_register(Register reg);
 
     void turn(Direction dir);
 private:

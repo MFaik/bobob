@@ -27,7 +27,7 @@ public:
     Robot* get_robot(int x, int y);
     void remove_robot(int x, int y);
 
-    void tick();
+    void tick(bool mouse);
     void fixed_tick();
     ~Game();
 };

@@ -7,10 +7,14 @@ void Program::tick(Robot &robot) {
         robot._sleep_dur--;
         return;
     }
-    robot._pc %= _code.size();
+    // robot._pc %= _code.size();
+    if(robot._pc > _code.size())
+        robot._pc -= _code.size();
     Instruction ins = _code[robot._pc];
     
     switch(ins.op) {
+        case NOP:
+            break;
         case MOV:
             get_assignee(robot, ins) = get_operand(robot, ins);
             break;
@@ -87,15 +91,15 @@ void Program::tick(Robot &robot) {
     robot._pc++;
 }
 
-int& Program::get_register(Robot &robot, Robot::Register reg) {
+unsigned int& Program::get_register(Robot &robot, Robot::Register reg) {
     return robot.get_register(reg);
 }
 
-int& Program::get_assignee(Robot &robot, const Instruction ins) {
+unsigned int& Program::get_assignee(Robot &robot, const Instruction ins) {
     return get_register(robot, ins.reg);
 }
 
-int Program::get_operand(Robot &robot, const Instruction ins) {
+unsigned int Program::get_operand(Robot &robot, const Instruction ins) {
     if(ins.register_toggle) {
         return get_register(robot, (Robot::Register)ins.operand);
     } else {

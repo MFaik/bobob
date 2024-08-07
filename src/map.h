@@ -14,7 +14,7 @@ class Robot;
 //seperate arrays can help memory layout
 struct Tile {
 public:
-    enum Type {
+    enum Type : short int {
         GRASS,
         STONE,
         PATH,
@@ -22,7 +22,7 @@ public:
         COAL_MINE,
         IRON_MINE,
     } _type;
-    int _health = 0;
+    short int _health = 0;
     ArenaPointer<Robot> _robot;
 };
 

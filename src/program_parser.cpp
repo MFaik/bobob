@@ -9,6 +9,7 @@
 #include "robot.h"
 
 const std::unordered_map<std::string, Program::Operation> op_map = {
+    {"NOP", Program::NOP},
     {"MOV", Program::MOV},
     {"ADD", Program::ADD},
     {"SUB", Program::SUB},
@@ -53,6 +54,7 @@ const std::unordered_map<std::string, int> constant_map = {
 };
 
 const std::unordered_map<Program::Operation, int> operand_cnt = {
+    {Program::NOP, 0},
     {Program::MOV, 2},
     {Program::ADD, 2},
     {Program::SUB, 2},
