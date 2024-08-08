@@ -99,7 +99,7 @@ std::string parse_label(
     if(line[r-1] == ':') {
         if(r-l == 1)
             return "label cannot be empty";
-        std::string label = line.substr(l, r-l);
+        std::string label = line.substr(l, r-l-1);
         if(label.find(' ') != std::string::npos)
             return "label cannot have spaces: " + label;
         if(constant_map.find(label) != constant_map.end())
@@ -109,7 +109,7 @@ std::string parse_label(
         if(label_map.find(label) != label_map.end())
             return "two labels cannot have the same name: " + label;
 
-        label_map[line.substr(l, r-l-1)] = ret._labels.size();
+        label_map[label] = ret._labels.size();
         ret._labels.push_back(code_cnt);
     } else {
         code_cnt++;
