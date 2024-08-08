@@ -84,7 +84,7 @@ struct ProgramError : public std::runtime_error {
 //TODO: add error handling
 Program parse_program(std::string str) {
     //the code must be all caps
-    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    std::transform(str.begin(), str.end(), str.begin(), toupper);
 
     Program ret;
     std::istringstream f(str);
