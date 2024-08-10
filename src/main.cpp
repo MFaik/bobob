@@ -1,8 +1,12 @@
 #include <raylib.h>
+#include "raygui.h"
 
 #include "game.h"
 #include "program_parser.h"
 extern Game g_game;
+
+#include "gui_engine.h"
+#include "gui_window.h"
 
 int main() {
     auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT 999\nJEQ go_retry\nADD A 1\nCMP A 10\n JNE loop\nTURN RIGHT");
@@ -34,6 +38,11 @@ int main() {
     ToggleFullscreen();
     SetTargetFPS(60);
     int fixed_cnt = 0;
+    GuiEngine engine;
+    engine.add_widget((new GuiWindow({100, 100}, {200, 200}, "layer0")), 0);
+    engine.add_widget((new GuiWindow({110, 100}, {200, 200}, "layer1 - 0")), 1);
+    engine.add_widget((new GuiWindow({120, 100}, {200, 200}, "layer1 - 1")), 1);
+    engine.add_widget((new GuiWindow({130, 100}, {200, 200}, "layer2")), 2);
     while(!WindowShouldClose()) {
         BeginDrawing();
         if(fixed_cnt > 3) {
@@ -44,10 +53,13 @@ int main() {
         }
         
         //TODO: add ui check first
-        g_game.tick(true);
 
         // ClearBackground(RAYWHITE);
         g_game.draw();
+
+        bool ui = engine.draw();
+        
+        g_game.tick(!ui);
 
         DrawFPS(0, 0);
         EndDrawing();
