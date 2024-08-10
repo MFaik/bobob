@@ -228,7 +228,6 @@ public:
     Program parse_program() {
         int line_cnt = -1;
         //parse the labels first to allow forward jumps
-        int code_cnt = 0;
         while(std::getline(f, line)) {
             line_cnt++;
             std::string err = parse_label();
