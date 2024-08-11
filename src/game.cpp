@@ -1,9 +1,11 @@
 #include "game.h"
-#include "robot.h"
 
 #include <algorithm>
 #include <raylib.h>
 #include <raymath.h>
+
+#include "robot.h"
+#include "program_parser.h"
 
 Game g_game;
 
@@ -12,6 +14,7 @@ constexpr float TILE_SIZE = 10;
 Game::Game() : _robot_allocator() {
     _camera = {};
     _camera.zoom = 2;
+    setup_program(parse_program(""));
 }
 
 void Game::setup_map() {

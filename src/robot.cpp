@@ -49,6 +49,7 @@ void Robot::go_forward() {
         _input = (int)g_game.get_tile(x, y)._type;
     } else {
         //TODO: add proper input id for objects and robot
+        //TODO: make this BLOCKED
         _input = 999;
     }
 }

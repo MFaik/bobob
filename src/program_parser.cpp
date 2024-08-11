@@ -8,7 +8,34 @@
 #include "program.h"
 #include "robot.h"
 
+std::vector<std::pair<std::string, std::string>> get_op_strs() {
+    return {
+        {"NOP", "does nothing"},
+        {"MOV", "MOV X C\nX = C"},
+        {"ADD", "ADD X C\nX = X + C"},
+        {"SUB", "SUB X C\nX = X - C"},
+        {"MUL", "MUL X C\nX = X * C"},
+        {"DIV", "DIV X C\nX = X / C"},
+        {"MOD", "MOD X C\nX = X % C"},
+        {"NOT", "NOT X\nX = !X"},
+        {"AND", "AND X C\nX = X & C"},
+        {"OR", "OR X C\nX = X | C"},
+        {"XOR", "XOR X C\nX = X ^ C"},
+        {"CMP", "CMP C D\nCOND = C - D"},
+        {"JMP", "JMP label\nJump to label."},
+        {"JEQ", "JEQ label\nJump to label if COND is 0."},
+        {"JNE", "JNE label\nJump to label if COND is not 0."},
+        {"LOOK", "LOOK\nWrite the tile in front to INPUT."},
+        {"TURN", "TURN C\nTurns to C, C can be relative or absolute."},
+        {"GO", "GO\nGo forward. Writes BLOCKED to INPUT if forward is blocked."},
+        {"SLP", "SLP C\nSleep C cycles."},
+        {"USE", "USE\nUse the currently selected item."},
+        {"SEL", "SEL C\nSelect item C."},
+    };
+}
+
 class ProgramParser {
+public:
     const std::unordered_map<std::string, Program::Operation> op_map = {
         {"NOP", Program::NOP},
         {"MOV", Program::MOV},
@@ -52,6 +79,7 @@ class ProgramParser {
         {"RIGHT", 5},
         {"DOWN", 6},
         {"LEFT", 7},
+        {"BLOCKED", 999},
     };
 
     const std::unordered_map<Program::Operation, int> operand_cnt = {
@@ -77,10 +105,7 @@ class ProgramParser {
         {Program::USE, 0},
         {Program::SEL, 1},
     };
-    struct ProgramError : public std::runtime_error {
-        using std::runtime_error::runtime_error;
-    };
-    
+private: 
     Program ret;
     std::string program_str;
     std::istringstream f;
@@ -252,7 +277,9 @@ public:
                         });
             }
         }
-
+        if(!ret._code.size()) {
+            ret._code.push_back(Program::Instruction());
+        }
         return ret;
     }
 };
@@ -264,3 +291,19 @@ Program parse_program(std::string str) {
     return program_parser.parse_program();
 }
 
+std::vector<std::string> get_reg_strs() {
+    ProgramParser tmp("");
+    std::vector<std::string> ret(tmp.reg_map.size());
+    for(auto reg : tmp.reg_map) {
+        ret.push_back(reg.first);
+    }
+    return ret;
+}
+std::vector<std::string> get_constant_strs() {
+    ProgramParser tmp("");
+    std::vector<std::string> ret(tmp.constant_map.size());
+    for(auto c : tmp.constant_map) {
+        ret.push_back(c.first);
+    }
+    return ret;
+}

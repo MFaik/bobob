@@ -1,26 +1,26 @@
+#include <imgui.h>
 #include <raylib.h>
-#include "raygui.h"
+#include "rlImGui.h"
 
 #include "game.h"
-#include "program_parser.h"
+// #include "program_parser.h"
 extern Game g_game;
 
-#include "gui_engine.h"
-#include "gui_window.h"
+#include "gui/program_window.h"
 
 int main() {
-    auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT 999\nJEQ go_retry\nADD A 1\nCMP A 10\n JNE loop\nTURN RIGHT");
+    // auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT BLOCKED\nJEQ go_retry\nADD A 1\nCMP A 10\n JNE loop\nTURN RIGHT");
     // auto prog = parse_program("ADD B RIGHT\nloop1:\nMOV A 0\nloop2:\nGO\nADD A 1\nCMP A 50\nJNE loop2\nTURN B\nCMP B RIGHT\nMOV B 0\nJNE SKIP\nMOV B 2\nSKIP:");
-    //auto prog = parse_program("NOP");
-    g_game.setup_program(prog);
-
-    for(auto e : prog._errors) {
-        std::cout << e.txt << std::endl;
-    }
-
-    if(prog._errors.size()) {
-        return 1;
-    }
+    // auto prog = parse_program("NOP");
+    // g_game.setup_program(prog);
+    //
+    // for(auto e : prog._errors) {
+    //     std::cout << e.txt << std::endl;
+    // }
+    //
+    // if(prog._errors.size()) {
+    //     return 1;
+    // }
 
     g_game.get_tile(0, 0)._type = Tile::IRON_MINE;
     g_game.get_tile(0, 4)._type = Tile::IRON_MINE;
@@ -37,12 +37,10 @@ int main() {
     InitWindow(GetScreenWidth(), GetScreenHeight(), "bobob");
     ToggleFullscreen();
     SetTargetFPS(60);
+    SetExitKey(0);
+    rlImGuiSetup(true);
     int fixed_cnt = 0;
-    GuiEngine engine;
-    engine.add_widget((new GuiWindow({100, 100}, {200, 200}, "layer0")), 0);
-    engine.add_widget((new GuiWindow({110, 100}, {200, 200}, "layer1 - 0")), 1);
-    engine.add_widget((new GuiWindow({120, 100}, {200, 200}, "layer1 - 1")), 1);
-    engine.add_widget((new GuiWindow({130, 100}, {200, 200}, "layer2")), 2);
+    ProgramWindow progwind("program.bob");
     while(!WindowShouldClose()) {
         BeginDrawing();
         if(fixed_cnt > 3) {
@@ -56,12 +54,20 @@ int main() {
 
         // ClearBackground(RAYWHITE);
         g_game.draw();
-
-        bool ui = engine.draw();
         
-        g_game.tick(!ui);
+        rlImGuiBegin();
+
+        // ImGui::ShowDemoWindow();
+        progwind.draw();
+
+        g_game.tick(!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow));
+
+        rlImGuiEnd();
 
         DrawFPS(0, 0);
         EndDrawing();
     }
+
+    rlImGuiShutdown();
+    CloseWindow();
 }

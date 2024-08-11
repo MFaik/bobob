@@ -1,4 +1,4 @@
 -xc++ 
 -std=c++23
--Isrc/raygui
--Isrc/gui
+-Isrc/imgui
+-Isrc

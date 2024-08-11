@@ -36,7 +36,7 @@ public:
         Robot::Register reg : 8;
         Operation op : 7;
 
-        Instruction(){}
+        Instruction() : op(NOP){}
     };
     struct Error {
         int line;
