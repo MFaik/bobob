@@ -54,7 +54,11 @@ $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 
 # Build step for C++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
+ifneq ($(OS), Windows_NT)
 	mkdir -p $(dir $@)
+else
+	mkdir $(subst /,\,$(dir $@))
+endif
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ -O3
 
 .PHONY: clean
