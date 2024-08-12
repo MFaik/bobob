@@ -57,7 +57,7 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 ifneq ($(OS), Windows_NT)
 	mkdir -p $(dir $@)
 else
-	mkdir $(subst /,\,$(dir $@))
+	if not exist "$(subst /,\,$(dir $@))" mkdir $(subst /,\,$(dir $@))
 endif
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ -O3
 
