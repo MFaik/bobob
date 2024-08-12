@@ -38,8 +38,9 @@ void Game::draw() {
     
     int screenTileWidth = GetScreenWidth()/(TILE_SIZE*_camera.zoom);
     int screenTileHeight = GetScreenHeight()/(TILE_SIZE*_camera.zoom);
-    for(int y_off = -1;y_off <= screenTileHeight;y_off++) {
-        for(int x_off = -1;x_off <= screenTileWidth;x_off++) {
+    //TODO: make this for loop not hacky
+    for(int y_off = -1;y_off <= screenTileHeight+1;y_off++) {
+        for(int x_off = -1;x_off <= screenTileWidth+1;x_off++) {
             int x = _camera.target.x/TILE_SIZE + x_off;
             int y = _camera.target.y/TILE_SIZE + y_off;
             _map.draw(x, y);
