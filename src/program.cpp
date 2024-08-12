@@ -7,9 +7,8 @@ void Program::tick(Robot &robot) {
         robot._sleep_dur--;
         return;
     }
-    // robot._pc %= _code.size();
     if(robot._pc >= _code.size())
-        robot._pc -= _code.size();
+        robot._pc = 0;
     Instruction ins = _code[robot._pc];
     
     switch(ins.op) {
