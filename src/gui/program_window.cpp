@@ -43,6 +43,10 @@ void ProgramWindow::draw() {
     ImGui::End();
 }
 
+void ProgramWindow::set_text(const std::string &text) {
+    _editor.SetText(text);
+}
+
 /*
 static TextEditor editor;
 auto cpos = editor.GetCursorPosition();

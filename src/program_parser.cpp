@@ -106,8 +106,7 @@ public:
         {Program::SEL, 1},
     };
 private: 
-    Program ret;
-    std::string program_str;
+    Program program;
     std::istringstream f;
     std::string line;
     int code_cnt = 0;
@@ -116,7 +115,9 @@ private:
 
 public:
     ProgramParser(std::string program_str) : 
-        program_str(program_str), f(program_str){}
+        f(program_str){
+        program._plain_text = program_str;
+    }
 private:
 
     std::string parse_label() {
@@ -143,8 +144,8 @@ private:
             if(label_map.find(label) != label_map.end())
                 return "two labels cannot have the same name: " + label;
 
-            label_map[label] = ret._labels.size();
-            ret._labels.push_back(code_cnt);
+            label_map[label] = program._labels.size();
+            program._labels.push_back(code_cnt);
         } else {
             code_cnt++;
         }
@@ -246,7 +247,7 @@ private:
             }
         }
 
-        ret._code.push_back(ins);
+        program._code.push_back(ins);
         return "";
     }
 public:
@@ -257,30 +258,30 @@ public:
             line_cnt++;
             std::string err = parse_label();
             if(err.size()) {
-                ret._errors.push_back({
+                program._errors.push_back({
                         line_cnt,
                         err,
                         });
             }
         }
         //reset the string stream
-        f.str(program_str);
+        f.str(program._plain_text);
         f.clear();
         line_cnt = -1;
         while(std::getline(f, line)) {
             line_cnt++;
             std::string err = parse_instruction();
             if(err.size()) {
-                ret._errors.push_back({
+                program._errors.push_back({
                         line_cnt,
                         err,
                         });
             }
         }
-        if(!ret._code.size()) {
-            ret._code.push_back(Program::Instruction());
+        if(!program._code.size()) {
+            program._code.push_back(Program::Instruction());
         }
-        return ret;
+        return program;
     }
 };
 

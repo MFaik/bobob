@@ -11,4 +11,5 @@ public:
     ProgramWindow(std::string title);
 
     void draw();
+    void set_text(const std::string& text);
 };

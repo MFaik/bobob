@@ -1,11 +1,15 @@
 #include "game.h"
 
-#include <algorithm>
 #include <raylib.h>
 #include <raymath.h>
 
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+
 #include "robot.h"
 #include "program_parser.h"
+#include "util.h"
 
 Game g_game;
 
@@ -17,9 +21,112 @@ Game::Game() : _robot_allocator() {
     setup_program(parse_program(""));
 }
 
-void Game::setup_map() {
-    //TODO: this will probably take in a file name 
+//TODO: add proper error handling
+void Game::load_game(std::string file_name) {
+    //load file
+    std::string file_str = get_file_contents(file_name.c_str());
+    const char* file = file_str.c_str();
+    size_t start_size = 6+2*sizeof(int);
+    if(file_str.size() < start_size) {
+        std::cout << "file too small" << std::endl;
+        return;
+    }
+    //file type check
+    if(strncmp(file, "bobob", 5)) {
+        std::cout << "invalid magic numbers" << std::endl;
+        return;
+    }
+    file += 5;
+    //version check
+    if(*file != 0) {
+        std::cout << "file version mismatch: " << *file << std::endl;
+        return;
+    }
+    file++;
+    //get count
+    size_t chunk_cnt = ((unsigned int*)file)[0];
+    size_t robot_cnt = ((unsigned int*)file)[1];
+    file += sizeof(unsigned int)*2;
+    size_t chunk_size = (sizeof(Tile)-sizeof(Tile::_robot))*CHUNK_SIZE*CHUNK_SIZE;
+    size_t robot_size = sizeof(Robot);
+    if(file_str.size() < start_size+chunk_size*chunk_cnt+robot_size*robot_cnt) {
+        std::cout << "file size mismatch: " << file_str.size() << " < " << 
+            start_size+chunk_size*chunk_cnt+robot_size*robot_cnt<< std::endl;
+        return;
+    }
+    //read chunks
     _map.clean_chunks();
+    if(chunk_cnt > 64) {
+        _map.resize_chunks(chunk_cnt);
+    }
+    for(size_t c = 0;c < chunk_cnt;c++) {
+        Chunk chunk;
+        std::array<int, 2> chunk_pos = *((std::array<int, 2>*)file);
+        file += sizeof(std::array<int, 2>);
+        for(size_t t = 0;t < sizeof(Chunk::_tiles)/sizeof(Tile);t++) {
+            chunk._tiles[t]._type = *((Tile::Type*)file);
+            file += sizeof(Tile::_type);
+            chunk._tiles[t]._health = *((decltype(Tile::_health)*)file);
+            file += sizeof(Tile::_health);
+        }
+        _map.load_chunk(chunk_pos, chunk);
+    }
+    //read robots
+    _robots.clear();
+    if(robot_cnt > 64) {
+        _robot_allocator.resize(robot_cnt);
+    }
+    for(size_t i = 0;i < robot_cnt;i++) {
+        auto r = _robot_allocator.allocate();
+        _robots.push_back(r);
+        auto& robot = *_robot_allocator.get(r);
+        robot = *((Robot*)file);
+        _map.add_robot(robot._x, robot._y, r);
+        file += sizeof(Robot);
+    }
+    //read code
+    file++;
+    std::string program(file);
+    setup_program(parse_program(program));
+}
+
+template<int N>
+struct Bytes : std::array<char, N> {
+  operator const char*() const {
+    return std::array<char, N>::data();
+  }
+};
+
+template<int N>
+std::ostream& operator<<(std::ostream& out, Bytes<N> src) {
+  out.write(src, N);
+  return out;
+}
+
+auto to_bytes(auto&& src) {
+  return std::bit_cast<Bytes<sizeof(src)>>(src);
+}
+
+void Game::save_game(std::string file_name) {
+    std::ofstream file(file_name, std::ios::out|std::ios::binary|std::ios::trunc);
+    file << "bobob";
+    file << (char)0;
+
+    // //TODO: copying every single chunk
+    auto chunks = _map.get_all_chunks();
+    unsigned int chunks_size = chunks.size();
+    unsigned int robots_size = _robots.size();
+    file << to_bytes(chunks_size) << to_bytes(robots_size);
+    for(auto& c : chunks) {
+        file << to_bytes(c.first);
+        for(Tile t : c.second._tiles) {
+            file << to_bytes(t._type) << to_bytes(t._health);
+        }
+    }
+    for(auto r : _robots) {
+        file << to_bytes(*_robot_allocator.get(r));
+    }
+    file << '\n' << _program._plain_text;
 }
 
 //TODO: find a better way to do this
@@ -27,8 +134,16 @@ void Game::setup_program(Program program) {
     std::swap(_program, program);
 }
 
-Tile& Game::get_tile(int x, int y) {
+std::string Game::get_program() {
+    return _program._plain_text;
+}
+
+const Tile& Game::get_tile(int x, int y) {
     return _map.get_tile(x, y);
+}
+
+Tile& Game::get_tile_ref(int x, int y) {
+    return _map.get_tile_ref(x, y);
 }
 
 //TODO: add proper way to use a camera

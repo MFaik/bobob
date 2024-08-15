@@ -37,6 +37,9 @@ private:
 
     unsigned int _sleep_dur = 0;
 public:
+    int _x, _y;
+    Direction _dir = NORTH;
+
     enum Register {
         A,
         B,
@@ -51,15 +54,12 @@ public:
         &Robot::_input, &Robot::_inventory_selector
     };
 
-    int _x, _y;
-    Direction _dir = NORTH;
-    int _tick_parity = 0;
     int get_tile_parity() const;
     unsigned int& get_register(Register reg);
 
     void turn(Direction dir);
 private:
-    inline std::array<int, 2> get_front() const;
+    std::array<int, 2> get_front() const;
 public:
     Robot(int x, int y);
     Robot(int x, int y, std::array<Item, 16> inventory);

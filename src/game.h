@@ -16,10 +16,13 @@ private:
     std::vector<ArenaPointer<Robot>> _robots;
 public:
     Game();
-    void setup_map();
+    void load_game(std::string file_name);
+    void save_game(std::string file_name);
     void setup_program(Program program);
+    std::string get_program();
 
-    Tile& get_tile(int x, int y);
+    const Tile& get_tile(int x, int y);
+    Tile& get_tile_ref(int x, int y);
     void draw();
 
     void add_robot(int x, int y);

@@ -47,6 +47,7 @@ public:
     std::vector<Instruction> _code;
     std::vector<unsigned int> _labels;
     std::vector<Error> _errors;
+    std::string _plain_text;
 public:
     void tick(Robot &robot);
 

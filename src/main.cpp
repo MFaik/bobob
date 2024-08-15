@@ -21,13 +21,13 @@ int main() {
     // if(prog._errors.size()) {
     //     return 1;
     // }
-
-    g_game.get_tile(0, 0)._type = Tile::IRON_MINE;
-    g_game.get_tile(0, 4)._type = Tile::IRON_MINE;
-
-    std::array<Item, 16> inv{};
-    inv[2] = PATH_ITEM;
-    
+    //
+    // g_game.get_tile(0, 0)._type = Tile::IRON_MINE;
+    // g_game.get_tile(0, 4)._type = Tile::IRON_MINE;
+    //
+    // std::array<Item, 16> inv{};
+    // inv[2] = PATH_ITEM;
+    // 
     // for(int y = 10;y < 1000;y++) {
     //     for(int x = 10;x < 1000;x++) {
     //         g_game.add_robot(x, y, inv);
@@ -61,6 +61,14 @@ int main() {
         progwind.draw();
 
         g_game.tick(!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow));
+
+        if(ImGui::Button("Save")) {
+            g_game.save_game("test.bobob");
+        }
+        if(ImGui::Button("Load")) {
+            g_game.load_game("test.bobob");
+            progwind.set_text(g_game.get_program());
+        }
 
         rlImGuiEnd();
 

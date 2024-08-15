@@ -1,6 +1,7 @@
 #include "robot.h"
-#include "game.h"
+#include <iostream>
 
+#include "game.h"
 extern Game g_game;
 
 Robot::Robot(int x, int y) : _x(x), _y(y) {}
@@ -24,7 +25,7 @@ void Robot::turn(Direction dir) {
     }
 }
 
-inline std::array<int, 2> Robot::get_front() const {
+std::array<int, 2> Robot::get_front() const {
     switch(_dir) {
         case NORTH:
             return {_x, _y-1};
@@ -43,7 +44,8 @@ inline std::array<int, 2> Robot::get_front() const {
 
 void Robot::go_forward() {
     auto [x, y] = get_front();
-    if(!g_game.get_tile(x, y)._robot) {
+    const auto& front_tile = g_game.get_tile(x, y);
+    if(front_tile._robot.empty()) {
         _x = x;
         _y = y;
         _input = (int)g_game.get_tile(x, y)._type;
@@ -78,19 +80,21 @@ void Robot::use() {
     auto [x, y] = get_front();
     auto &tile = g_game.get_tile(x, y);
     switch(_inventory[_inventory_selector]) {
+        //TODO: remove this case
+        case 0:
         case PATH_ITEM:
-            tile._type = Tile::PATH;
+            g_game.get_tile_ref(x, y)._type = Tile::PATH;
             break;
         case AXE:
             if(tile._type == Tile::TREE) {
-                tile._type = Tile::GRASS;
+                g_game.get_tile_ref(x, y)._type = Tile::GRASS;
             }
             break;
         case PICKAXE:
             if(tile._type == Tile::COAL_MINE) {
-                tile._type = Tile::STONE;
+                g_game.get_tile_ref(x, y)._type = Tile::STONE;
             } else if(tile._type == Tile::IRON_MINE) {
-                tile._type = Tile::STONE;
+                g_game.get_tile_ref(x, y)._type = Tile::STONE;
             }
             break;
         default:
