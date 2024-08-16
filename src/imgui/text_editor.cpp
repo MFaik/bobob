@@ -1080,10 +1080,13 @@ void TextEditor::Render()
 			++lineNo;
 		}
 
+        auto windowPos = ImGui::GetWindowPos();
+        auto mousePos = ImGui::GetMousePos();
 		// Draw a tooltip on known identifiers/preprocessor symbols
-		if (ImGui::IsMousePosValid())
+		if (ImGui::IsMousePosValid() && 
+            mousePos.x >= windowPos.x && mousePos.y >= windowPos.y)
 		{
-			auto id = GetWordAt(ScreenPosToCoordinates(ImGui::GetMousePos()));
+			auto id = GetWordAt(ScreenPosToCoordinates(mousePos));
 			if (!id.empty())
 			{
                 if(!mLanguageDefinition.mCaseSensitive) {
@@ -1130,7 +1133,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(mPalette[(int)PaletteIndex::Background]));
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
 	if (!mIgnoreImGuiChild)
-		ImGui::BeginChild(aTitle, aSize, aBorder, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NoMove);
+		ImGui::BeginChild(aTitle, aSize, aBorder, ImGuiWindowFlags_HorizontalScrollbar /*| ImGuiWindowFlags_AlwaysHorizontalScrollbar*/ | ImGuiWindowFlags_NoMove);
 
 	if (mHandleKeyboardInputs)
 	{
