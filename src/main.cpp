@@ -2,11 +2,12 @@
 #include <raylib.h>
 #include "rlImGui.h"
 
-#include "game.h"
 // #include "program_parser.h"
+#include "game.h"
 extern Game g_game;
 
-#include "gui/program_window.h"
+#include "game_ui.h"
+extern GameUI g_game_ui;
 
 int main() {
     // auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT BLOCKED\nJEQ go_retry\nADD A 1\nCMP A 10\n JNE loop\nTURN RIGHT");
@@ -33,6 +34,8 @@ int main() {
     //         g_game.add_robot(x, y, inv);
     //     }
     // }
+    g_game.add_robot(10, 10);
+    auto &robot = *g_game.get_robot(10, 10);
 
     InitWindow(GetScreenWidth(), GetScreenHeight(), "bobob");
     ToggleFullscreen();
@@ -40,7 +43,7 @@ int main() {
     SetExitKey(0);
     rlImGuiSetup(true);
     int fixed_cnt = 0;
-    ProgramWindow progwind("program.bob");
+
     while(!WindowShouldClose()) {
         BeginDrawing();
         if(fixed_cnt > 3) {
@@ -57,20 +60,38 @@ int main() {
         
         rlImGuiBegin();
 
-        // ImGui::ShowDemoWindow();
-        progwind.draw();
-
-        g_game.tick(!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow));
+        //ImGui::ShowDemoWindow();
 
         if(ImGui::Button("Save")) {
             g_game.save_game("test.bobob");
         }
+        ImGui::SameLine();
         if(ImGui::Button("Load")) {
             g_game.load_game("test.bobob");
-            progwind.set_text(g_game.get_program());
+            g_game_ui.set_program_text(g_game.get_program());
+        }
+        ImGui::SameLine();
+        if(ImGui::Button(g_game.is_paused() ? "Play" : "Pause")) {
+            g_game.toggle_pause();
+        }
+        if(g_game.is_paused()) {
+            ImGui::SameLine();
+            if(ImGui::Button("Step")) {
+                g_game.fixed_tick(true);
+            }
         }
 
+        g_game_ui.draw();
+
+        ImGuiHoveredFlags mouse_flag = 0;
+        mouse_flag |= ImGuiHoveredFlags_AnyWindow;
+        mouse_flag |= ImGuiHoveredFlags_AllowWhenBlockedByActiveItem;
+        bool mouse_free = !ImGui::IsWindowHovered(mouse_flag);
+        bool keyboard_free = !ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow);
+        
         rlImGuiEnd();
+
+        g_game.tick(mouse_free, keyboard_free);
 
         DrawFPS(0, 0);
         EndDrawing();

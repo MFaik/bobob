@@ -26,6 +26,8 @@ enum Item : char {
 
 class Robot {
 private:
+//TODO: adding this public is hacky
+public:
     friend class Program;
     std::array<Item, 16> _inventory;
 

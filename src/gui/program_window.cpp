@@ -10,40 +10,42 @@ ProgramWindow::ProgramWindow(std::string title) : _title(title), _editor() {
     _editor.SetLanguageDefinition(TextEditor::LanguageDefinition::Bobob());
 }
 
-void ProgramWindow::draw() {
+bool ProgramWindow::draw() {
     ImGuiWindowFlags flag = 0;
     flag |= ImGuiWindowFlags_NoCollapse;
     flag |= ImGuiWindowFlags_MenuBar;
-    flag |= ImGuiWindowFlags_NoDecoration;
-    //TODO: remove this and find a better way to resize without decorations
-    flag |= ImGuiWindowFlags_NoResize;
-    ImGui::Begin(_title.c_str(), nullptr, flag);
-    ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-
-    if(ImGui::BeginMenuBar()) {
-        ImGui::Text("%s", _title.c_str());
-        ImGui::Separator();
-        if(ImGui::MenuItem("Compile")) {
-            auto program = parse_program(_editor.GetText());
-            if(program._errors.size()) {
-                TextEditor::ErrorMarkers errors;
-                for(auto error : program._errors) {
-                    errors[error.line+1] = error.txt;
-                    _editor.SetErrorMarkers(errors);
-                }
-            } else {
-                g_game.setup_program(program);
-            }
-        }
-        ImGui::EndMenuBar();
-    }
+    bool ret = true;
     
-    _editor.Render("TextEditor");
+    std::string name = "##"+_title;
+    if(ImGui::Begin(name.c_str(), &ret, flag)) {
+        ImGui::SetWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 
-    ImGui::End();
+        if(ImGui::BeginMenuBar()) {
+            ImGui::Text("%s", _title.c_str());
+            ImGui::Separator();
+            if(ImGui::MenuItem("Compile")) {
+                auto program = parse_program(_editor.GetText());
+                if(program._errors.size()) {
+                    TextEditor::ErrorMarkers errors;
+                    for(auto error : program._errors) {
+                        errors[error.line+1] = error.txt;
+                        _editor.SetErrorMarkers(errors);
+                    }
+                } else {
+                    g_game.setup_program(program);
+                }
+            }
+            ImGui::EndMenuBar();
+        }
+
+        _editor.Render("TextEditor");
+
+        ImGui::End();
+    }
+    return ret;
 }
 
-void ProgramWindow::set_text(const std::string &text) {
+void ProgramWindow::set_text(const std::string& text) {
     _editor.SetText(text);
 }
 

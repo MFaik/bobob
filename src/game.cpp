@@ -10,6 +10,8 @@
 #include "robot.h"
 #include "program_parser.h"
 #include "util.h"
+#include "game_ui.h"
+extern GameUI g_game_ui;
 
 Game g_game;
 
@@ -23,6 +25,7 @@ Game::Game() : _robot_allocator() {
 
 //TODO: add proper error handling
 void Game::load_game(std::string file_name) {
+    g_game_ui.reset_robot_windows();
     //load file
     std::string file_str = get_file_contents(file_name.c_str());
     const char* file = file_str.c_str();
@@ -87,7 +90,7 @@ void Game::load_game(std::string file_name) {
     //read code
     file++;
     std::string program(file);
-    setup_program(parse_program(program));
+    setup_program(parse_program(program), false);
 }
 
 template<int N>
@@ -130,8 +133,13 @@ void Game::save_game(std::string file_name) {
 }
 
 //TODO: find a better way to do this
-void Game::setup_program(Program program) {
+void Game::setup_program(Program program, bool reset_robots) {
     std::swap(_program, program);
+    if(reset_robots) {
+        for(auto r : _robots) {
+            _robot_allocator.get(r)->_pc = 0;
+        }
+    }
 }
 
 std::string Game::get_program() {
@@ -206,50 +214,62 @@ void Game::remove_robot(int x, int y) {
     //it must also exist in the _robots vector
     _robots.erase(std::find(_robots.begin(), _robots.end(), r));
     _map.remove_robot(x, y);
+    //don't forget to close the robot window
+    g_game_ui.remove_robot_window(_robot_allocator.get(r));
+
     _robot_allocator.remove(r);
 }
 
-void Game::tick(bool mouse) {
-    if(IsKeyDown(KEY_RIGHT)) {
-        _camera.target.x += 2;
+void Game::tick(bool mouse, bool keyboard) {
+    if(keyboard) {
+        if(IsKeyDown(KEY_RIGHT)) {
+            _camera.target.x += 2;
+        }
+        if(IsKeyDown(KEY_LEFT)) {
+            _camera.target.x -= 2;
+        }
+        if(IsKeyDown(KEY_UP)) {
+            _camera.target.y -= 2;
+        }
+        if(IsKeyDown(KEY_DOWN)) {
+            _camera.target.y += 2;
+        }
     }
-    if(IsKeyDown(KEY_LEFT)) {
-        _camera.target.x -= 2;
-    }
-    if(IsKeyDown(KEY_UP)) {
-        _camera.target.y -= 2;
-    }
-    if(IsKeyDown(KEY_DOWN)) {
-        _camera.target.y += 2;
-    }
-    if(!mouse)
-        return;
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), _camera);
-        mousePos = Vector2Scale(mousePos, 1.0/TILE_SIZE);
-        add_robot(mousePos.x, mousePos.y);
-    }
-    if(!FloatEquals(GetMouseWheelMove(), 0)) {
-        float zoom_change = 1;
-        if(GetMouseWheelMove() < 0 && _camera.zoom > 0.4)
-            zoom_change = 0.8;
-        if(GetMouseWheelMove() > 0 && _camera.zoom < 8)
-            zoom_change = 1.25;
+    if(mouse) {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            Vector2 mouse_pos = GetScreenToWorld2D(GetMousePosition(), _camera);
+            mouse_pos = Vector2Scale(mouse_pos, 1.0/TILE_SIZE);
+            auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y)._robot;
+            if(robot.empty()) {
+                add_robot(mouse_pos.x, mouse_pos.y);
+            } else {
+                g_game_ui.add_robot_window(_robot_allocator.get(robot));
+            }
+        }
+        if(!FloatEquals(GetMouseWheelMove(), 0)) {
+            float zoom_change = 1;
+            if(GetMouseWheelMove() < 0 && _camera.zoom > 0.4)
+                zoom_change = 0.8;
+            if(GetMouseWheelMove() > 0 && _camera.zoom < 8)
+                zoom_change = 1.25;
 
-        float w = GetScreenWidth()/_camera.zoom;
-        float h = GetScreenHeight()/_camera.zoom;
-        _camera.zoom *= zoom_change;
-        float new_w = GetScreenWidth()/_camera.zoom;
-        float new_h = GetScreenHeight()/_camera.zoom;
+            float w = GetScreenWidth()/_camera.zoom;
+            float h = GetScreenHeight()/_camera.zoom;
+            _camera.zoom *= zoom_change;
+            float new_w = GetScreenWidth()/_camera.zoom;
+            float new_h = GetScreenHeight()/_camera.zoom;
 
-        _camera.target = Vector2Add(_camera.target, {
-            (w-new_w) * GetMousePosition().x/GetScreenWidth(),
-            (h-new_h) * GetMousePosition().y/GetScreenHeight()
-        });
+            _camera.target = Vector2Add(_camera.target, {
+                    (w-new_w) * GetMousePosition().x/GetScreenWidth(),
+                    (h-new_h) * GetMousePosition().y/GetScreenHeight()
+                    });
+        }
     }
 }
 
-void Game::fixed_tick() {
+void Game::fixed_tick(bool ignore_pause) {
+    if(_paused && !ignore_pause)
+        return;
     for(ArenaPointer<Robot> r_ptr : _robots) {
         auto r = _robot_allocator.get(r_ptr);
         int x = r->_x, y = r->_y;
@@ -260,6 +280,14 @@ void Game::fixed_tick() {
         }
     }
     _map.tick();
+}
+
+void Game::toggle_pause() {
+    _paused = !_paused;
+}
+
+bool Game::is_paused() {
+    return _paused;
 }
 
 Game::~Game() {

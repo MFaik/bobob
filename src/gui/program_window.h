@@ -10,6 +10,6 @@ private:
 public:
     ProgramWindow(std::string title);
 
-    void draw();
+    bool draw();
     void set_text(const std::string& text);
 };
