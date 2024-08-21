@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include <cmath>
+#include <cstdio>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -10,15 +12,17 @@
 #include "robot.h"
 #include "program_parser.h"
 #include "util.h"
+
 #include "game_ui.h"
 extern GameUI g_game_ui;
 
+#include "assets.h"
+extern Assets g_assets;
+
 Game g_game;
 
-constexpr float TILE_SIZE = 10;
-
 Game::Game() : _robot_allocator() {
-    _camera = {};
+    _camera = {0, 0, 0, 0, 0, 0};
     _camera.zoom = 2;
     setup_program(parse_program(""));
 }
@@ -50,7 +54,7 @@ void Game::load_game(std::string file_name) {
     size_t chunk_cnt = ((unsigned int*)file)[0];
     size_t robot_cnt = ((unsigned int*)file)[1];
     file += sizeof(unsigned int)*2;
-    size_t chunk_size = (sizeof(Tile)-sizeof(Tile::_robot))*CHUNK_SIZE*CHUNK_SIZE;
+    size_t chunk_size = (sizeof(Tile)-sizeof(Tile::robot))*CHUNK_SIZE*CHUNK_SIZE;
     size_t robot_size = sizeof(Robot);
     if(file_str.size() < start_size+chunk_size*chunk_cnt+robot_size*robot_cnt) {
         std::cout << "file size mismatch: " << file_str.size() << " < " << 
@@ -66,11 +70,11 @@ void Game::load_game(std::string file_name) {
         Chunk chunk;
         std::array<int, 2> chunk_pos = *((std::array<int, 2>*)file);
         file += sizeof(std::array<int, 2>);
-        for(size_t t = 0;t < sizeof(Chunk::_tiles)/sizeof(Tile);t++) {
-            chunk._tiles[t]._type = *((Tile::Type*)file);
-            file += sizeof(Tile::_type);
-            chunk._tiles[t]._health = *((decltype(Tile::_health)*)file);
-            file += sizeof(Tile::_health);
+        for(size_t t = 0;t < sizeof(Chunk::tiles)/sizeof(Tile);t++) {
+            chunk.tiles[t].type = *((Item*)file);
+            file += sizeof(Tile::type);
+            chunk.tiles[t].data = *((decltype(Tile::data)*)file);
+            file += sizeof(Tile::data);
         }
         _map.load_chunk(chunk_pos, chunk);
     }
@@ -122,8 +126,8 @@ void Game::save_game(std::string file_name) {
     file << to_bytes(chunks_size) << to_bytes(robots_size);
     for(auto& c : chunks) {
         file << to_bytes(c.first);
-        for(Tile t : c.second._tiles) {
-            file << to_bytes(t._type) << to_bytes(t._health);
+        for(Tile t : c.second.tiles) {
+            file << to_bytes(t.type) << to_bytes(t.data);
         }
     }
     for(auto r : _robots) {
@@ -154,35 +158,8 @@ Tile& Game::get_tile_ref(int x, int y) {
     return _map.get_tile_ref(x, y);
 }
 
-//TODO: add proper way to use a camera
-//TODO: add screen clear or graphics
-void Game::draw() {
-    BeginMode2D(_camera);
-    
-    int screenTileWidth = GetScreenWidth()/(TILE_SIZE*_camera.zoom);
-    int screenTileHeight = GetScreenHeight()/(TILE_SIZE*_camera.zoom);
-    //TODO: make this for loop not hacky
-    for(int y_off = -1;y_off <= screenTileHeight+1;y_off++) {
-        for(int x_off = -1;x_off <= screenTileWidth+1;x_off++) {
-            int x = _camera.target.x/TILE_SIZE + x_off;
-            int y = _camera.target.y/TILE_SIZE + y_off;
-            _map.draw(x, y);
-        }
-    }
-    
-    const int robot_offset = TILE_SIZE*2;
-    for(auto &r_ptr : _robots) {
-        auto r = _robot_allocator.get(r_ptr);
-        if(r->_x*TILE_SIZE-_camera.target.x > -robot_offset && 
-           r->_x*TILE_SIZE-_camera.target.x < screenTileWidth*TILE_SIZE+robot_offset && 
-           r->_y*TILE_SIZE-_camera.target.y > -robot_offset && 
-           r->_y*TILE_SIZE-_camera.target.y < screenTileHeight*TILE_SIZE+robot_offset) {
-            DrawCircle(r->_x*TILE_SIZE+TILE_SIZE/2, 
-                       r->_y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/2, WHITE);
-        }
-    }
-    
-    EndMode2D();
+Item Game::use(int x, int y, Item item) {
+    return _map.use(x, y, item);
 }
 
 //TODO: try profiling an arena allocator
@@ -208,6 +185,10 @@ Robot* Game::get_robot(int x, int y) {
     return _robot_allocator.get(_map.get_robot(x, y));
 }
 
+Robot* Game::get_robot(ArenaPointer<Robot> robot) {
+    return _robot_allocator.get(robot);
+}
+
 void Game::remove_robot(int x, int y) {
     ArenaPointer<Robot> r = _map.get_robot(x, y);
     //if the pointer still exists in the map
@@ -218,6 +199,27 @@ void Game::remove_robot(int x, int y) {
     g_game_ui.remove_robot_window(_robot_allocator.get(r));
 
     _robot_allocator.remove(r);
+}
+
+//TODO: remove this when hud is added
+Item current_item = Item::EMPTY;
+//TODO: add proper way to use a camera
+void Game::draw() {
+    BeginMode2D(_camera);
+    ClearBackground(DARKGREEN);
+    
+    int screenTileWidth = GetScreenWidth()/(TILE_SIZE*_camera.zoom);
+    int screenTileHeight = GetScreenHeight()/(TILE_SIZE*_camera.zoom);
+    //TODO: make this for loop not hacky
+    for(int y_off = -1;y_off <= screenTileHeight+1;y_off++) {
+        for(int x_off = -1;x_off <= screenTileWidth+1;x_off++) {
+            int x = _camera.target.x/TILE_SIZE + x_off;
+            int y = _camera.target.y/TILE_SIZE + y_off;
+            _map.draw(x, y);
+        }
+    }
+    
+    EndMode2D();
 }
 
 void Game::tick(bool mouse, bool keyboard) {
@@ -234,24 +236,35 @@ void Game::tick(bool mouse, bool keyboard) {
         if(IsKeyDown(KEY_DOWN)) {
             _camera.target.y += 2;
         }
+        if(IsKeyPressed(KEY_ONE)) {
+            current_item = Item::ROBOT;
+        }
+        if(IsKeyPressed(KEY_TWO)) {
+            current_item = Item::APPLE;
+        }
+        if(IsKeyPressed(KEY_THREE)) {
+            current_item = Item::FIRE;
+        }
     }
     if(mouse) {
+        //TODO: fix mouse press position
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             Vector2 mouse_pos = GetScreenToWorld2D(GetMousePosition(), _camera);
-            mouse_pos = Vector2Scale(mouse_pos, 1.0/TILE_SIZE);
-            auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y)._robot;
+            mouse_pos = Vector2Scale(mouse_pos, 1.0f/TILE_SIZE);
+            mouse_pos = Vector2(std::floor(mouse_pos.x), std::floor(mouse_pos.y));
+            auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y).robot;
             if(robot.empty()) {
-                add_robot(mouse_pos.x, mouse_pos.y);
+                use(mouse_pos.x, mouse_pos.y, current_item);
             } else {
                 g_game_ui.add_robot_window(_robot_allocator.get(robot));
             }
         }
         if(!FloatEquals(GetMouseWheelMove(), 0)) {
             float zoom_change = 1;
-            if(GetMouseWheelMove() < 0 && _camera.zoom > 0.4)
-                zoom_change = 0.8;
+            if(GetMouseWheelMove() < 0 && _camera.zoom > 0.4f)
+                zoom_change = 0.8f;
             if(GetMouseWheelMove() > 0 && _camera.zoom < 8)
-                zoom_change = 1.25;
+                zoom_change = 1.25f;
 
             float w = GetScreenWidth()/_camera.zoom;
             float h = GetScreenHeight()/_camera.zoom;
@@ -260,9 +273,9 @@ void Game::tick(bool mouse, bool keyboard) {
             float new_h = GetScreenHeight()/_camera.zoom;
 
             _camera.target = Vector2Add(_camera.target, {
-                    (w-new_w) * GetMousePosition().x/GetScreenWidth(),
-                    (h-new_h) * GetMousePosition().y/GetScreenHeight()
-                    });
+                (w-new_w) * GetMousePosition().x/GetScreenWidth(),
+                (h-new_h) * GetMousePosition().y/GetScreenHeight()
+            });
         }
     }
 }

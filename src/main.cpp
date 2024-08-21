@@ -2,12 +2,16 @@
 #include <raylib.h>
 #include "rlImGui.h"
 
-// #include "program_parser.h"
+#include "item.h"
+
 #include "game.h"
 extern Game g_game;
 
 #include "game_ui.h"
 extern GameUI g_game_ui;
+
+#include "assets.h"
+extern Assets g_assets;
 
 int main() {
     // auto prog = parse_program("SEL 2\nMOV A 0\nloop:\nUSE\ngo_retry:\nGO\nCMP INPUT BLOCKED\nJEQ go_retry\nADD A 1\nCMP A 10\n JNE loop\nTURN RIGHT");
@@ -23,26 +27,34 @@ int main() {
     //     return 1;
     // }
     //
-    // g_game.get_tile(0, 0)._type = Tile::IRON_MINE;
-    // g_game.get_tile(0, 4)._type = Tile::IRON_MINE;
+    // g_game.get_tile_ref(0, 0).type = Item::STONE;
+    // g_game.get_tile_ref(0, 4).type = Item::STONE;
     //
-    // std::array<Item, 16> inv{};
-    // inv[2] = PATH_ITEM;
+    std::array<Item, 16> inv{};
+    inv[0] = Item::APPLE;
+    inv[1] = Item::APPLE;
+    inv[2] = Item::APPLE;
+    inv[3] = Item::APPLE;
+    inv[4] = Item::STONE;
+    inv[5] = Item::CHARCOAL;
+    inv[15] = Item::BOX;
+    g_game.add_robot(10, 10, inv);
     // 
     // for(int y = 10;y < 1000;y++) {
     //     for(int x = 10;x < 1000;x++) {
     //         g_game.add_robot(x, y, inv);
     //     }
     // }
-    g_game.add_robot(10, 10);
-    auto &robot = *g_game.get_robot(10, 10);
-
+    SetTraceLogLevel(LOG_ERROR);
     InitWindow(GetScreenWidth(), GetScreenHeight(), "bobob");
     ToggleFullscreen();
     SetTargetFPS(60);
     SetExitKey(0);
     rlImGuiSetup(true);
     int fixed_cnt = 0;
+
+    g_assets.load_textures();
+    while(!g_assets.is_textures_loaded());
 
     while(!WindowShouldClose()) {
         BeginDrawing();
@@ -53,9 +65,6 @@ int main() {
             fixed_cnt++;
         }
         
-        //TODO: add ui check first
-
-        // ClearBackground(RAYWHITE);
         g_game.draw();
         
         rlImGuiBegin();

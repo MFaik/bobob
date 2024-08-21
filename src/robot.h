@@ -1,27 +1,18 @@
 #pragma once
+
 #include <array>
+
+#include "item.h"
 
 enum Direction : char {
     NORTH,
     EAST,
     SOUTH,
     WEST,
-    UP,
+    FORWARD,
     RIGHT,
-    DOWN,
+    BACK,
     LEFT,
-};
-
-//TODO: create an items file
-enum Item : char {
-    NONE,
-    WOOD,
-    COAL,
-    IRON_ORE,
-    IRON_BAR,
-    AXE,
-    PICKAXE,
-    PATH_ITEM,
 };
 
 class Robot {
@@ -32,7 +23,8 @@ public:
     std::array<Item, 16> _inventory;
 
     //registers
-    unsigned int _inventory_selector = 0;
+    //selected item
+    unsigned int _sel = 0;
     unsigned int _cond = 0;
     unsigned int _a = 0, _b = 0, _input = 0;
     unsigned int _pc = 0;
@@ -53,7 +45,7 @@ public:
     constexpr static unsigned int Robot::* regs[6] = {
         &Robot::_a, &Robot::_b,
         &Robot::_pc, &Robot::_cond,
-        &Robot::_input, &Robot::_inventory_selector
+        &Robot::_input, &Robot::_sel
     };
 
     int get_tile_parity() const;

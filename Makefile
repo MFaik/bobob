@@ -49,7 +49,7 @@ CPPFLAGS := $(INC_FLAGS) -MMD -MP -pedantic -Wall -Wextra -std=c++23
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS) -O3
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIB_FLAGS)
 		
 
 # Build step for C++ source
@@ -59,7 +59,7 @@ ifneq ($(OS), Windows_NT)
 else
 	if not exist "$(subst /,\,$(dir $@))" mkdir $(subst /,\,$(dir $@))
 endif
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ -O3
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:

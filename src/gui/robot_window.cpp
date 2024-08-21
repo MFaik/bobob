@@ -1,8 +1,15 @@
-#include <raylib.h>
-#include <string>
-#include "imgui.h"
-
 #include "robot_window.h"
+
+#include <raylib.h>
+#include "imgui.h"
+#include "rlImGui.h"
+
+#include <string>
+
+#include "item.h"
+#include "assets.h"
+extern Assets g_assets;
+
 
 RobotWindow::RobotWindow(Robot* robot, ImVec2 start_pos) : 
     _robot(robot), _start_pos(start_pos) {
@@ -10,16 +17,16 @@ RobotWindow::RobotWindow(Robot* robot, ImVec2 start_pos) :
     counter++;
     id = counter;
 }
-
+//TODO: show current code line?
 bool RobotWindow::draw() {
     if(_first_draw) {
         auto pivot = ImVec2(-0.1f, 0.5f);
-        if(_start_pos.x > GetScreenWidth()-100) {
+        if(_start_pos.x > GetScreenWidth()-180) {
             pivot.x = 1.1f;
         }
-        if(_start_pos.y < 100) {
+        if(_start_pos.y < 180) {
             pivot.y = 0;
-        } else if(_start_pos.y > GetScreenHeight()-100) {
+        } else if(_start_pos.y > GetScreenHeight()-180) {
             pivot.y = 1.0f;
         }
         ImGui::SetNextWindowPos(_start_pos, ImGuiCond_Appearing, pivot);
@@ -43,12 +50,28 @@ bool RobotWindow::draw() {
             ImGui::TableSetColumnIndex(0);
             ImGui::Text("INPUT: %d", _robot->_input);
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text("SEL: %d", _robot->_inventory_selector);
+            ImGui::Text("SEL: %d", _robot->_sel);
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             ImGui::Text("COND: %d", _robot->_cond);
             ImGui::TableSetColumnIndex(1);
             ImGui::Text("PC: %d", _robot->_pc);
+            ImGui::EndTable();
+        }
+        //ImGui::SameLine();
+        if(ImGui::BeginTable("registers", 4, ImGuiTableFlags_Borders)) {
+            for(int i = 0;i < 16;i++) {
+                ImGui::TableNextColumn();
+                Item item = _robot->_inventory[i];
+                if(item != Item::EMPTY) {
+                    rlImGuiImage(&g_assets.get_texture(item));
+                    ImGui::Text("%s", get_item_name(item));
+                } else {
+                    //TODO: fix this magic number
+                    ImGui::Dummy(ImVec2(50, 50));
+                    ImGui::Text("%s", "");
+                }
+            }
             ImGui::EndTable();
         }
         ImGui::End();

@@ -7,6 +7,7 @@
 
 #include "program.h"
 #include "robot.h"
+#include "item.h"
 
 std::vector<std::pair<std::string, std::string>> get_op_strs() {
     return {
@@ -33,6 +34,9 @@ std::vector<std::pair<std::string, std::string>> get_op_strs() {
         {"SEL", "SEL C\nSelect item C."},
     };
 }
+
+//TODO: I could not get this to work any other way
+std::unordered_map<std::string, int> constant_map;
 
 class ProgramParser {
 public:
@@ -69,18 +73,6 @@ public:
         {"SEL", Robot::Sel},
     };
 
-    //TODO: add EVERY SINGLE ITEM here
-    const std::unordered_map<std::string, int> constant_map = {
-        {"NORTH", 0},
-        {"EAST", 1},
-        {"SOUTH", 2},
-        {"WEST", 3},
-        {"UP", 4},
-        {"RIGHT", 5},
-        {"DOWN", 6},
-        {"LEFT", 7},
-        {"BLOCKED", 999},
-    };
 
     const std::unordered_map<Program::Operation, int> operand_cnt = {
         {Program::NOP, 0},
@@ -116,10 +108,24 @@ private:
 public:
     ProgramParser(std::string program_str) : 
         f(program_str){
+        if(constant_map.size() == 0) {
+            constant_map = std::unordered_map<std::string, int>{
+                {"NORTH", 0},
+                {"EAST", 1},
+                {"SOUTH", 2},
+                {"WEST", 3},
+                {"FORWARD", 4},
+                {"RIGHT", 5},
+                {"BACK", 6},
+                {"LEFT", 7},
+            };
+            for(auto [item, name] : get_item_name_map()) {
+                constant_map[name] = (int)item;
+            }
+        }
         program._plain_text = program_str;
     }
 private:
-
     std::string parse_label() {
         int l = 0, r = line.size();
         //remove comments
@@ -300,10 +306,11 @@ std::vector<std::string> get_reg_strs() {
     }
     return ret;
 }
+
 std::vector<std::string> get_constant_strs() {
     ProgramParser tmp("");
-    std::vector<std::string> ret(tmp.constant_map.size());
-    for(auto c : tmp.constant_map) {
+    std::vector<std::string> ret(constant_map.size());
+    for(auto c : constant_map) {
         ret.push_back(c.first);
     }
     return ret;
