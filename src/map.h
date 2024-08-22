@@ -18,6 +18,7 @@ struct TileUpdate {
     enum Type {
         BURN,
         APPLE,
+        FLOW,
     } type;
     TileUpdate(int x, int y, Type type):x(x), y(y), type(type) {}
 };
@@ -80,7 +81,7 @@ public:
     void add_robot(int x, int y, ArenaPointer<Robot> r);
     void remove_robot(int x, int y);
     ArenaPointer<Robot> get_robot(int x, int y);
-    Item use(int x, int y, Item item);
+    Item use(int x, int y, Item item, bool manual = false);
 private:
     void push_update_around(int x, int y, TileUpdate::Type update);
     void push_update(TileUpdate update, bool first = false);

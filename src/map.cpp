@@ -84,6 +84,7 @@ void Map::draw(int x, int y) {
         case Item::CHARCOAL:
         case Item::PATH:
         case Item::STONE:
+        case Item::LAVA:
             //TODO: add noise
             DrawTexturePro(
                 g_assets.get_texture(tile.get_type(), x+y),
@@ -201,7 +202,7 @@ ArenaPointer<Robot> Map::get_robot(int x, int y) {
 }
 //TODO: remove repeated get_tile calls
 //TODO: make this code better?
-Item Map::use(int x, int y, Item item) {
+Item Map::use(int x, int y, Item item, bool manual) {
     const Tile& tile = get_tile(x, y);
     switch(item) {
         case Item::EMPTY:
@@ -233,8 +234,14 @@ Item Map::use(int x, int y, Item item) {
                 return Item::EMPTY;
             }
             if(tile.get_type() == Item::CHARCOAL) {
-                push_update({x, y, TileUpdate::BURN});
+                push_update({x, y, TileUpdate::BURN}, manual);
                 return Item::EMPTY;
+            }
+            break;
+        case Item::LAVA:
+            if(tile.get_type() == Item::EMPTY) {
+                get_tile_ref(x, y) = Tile(item);
+                push_update({x, y, TileUpdate::BURN});
             }
             break;
         //placable items
@@ -255,7 +262,7 @@ Item Map::use(int x, int y, Item item) {
         case Item::APPLE:
             if(tile.get_type() == Item::EMPTY) {
                 get_tile_ref(x, y) = Tile(item);
-                push_update({x, y, TileUpdate::APPLE}, true);
+                push_update({x, y, TileUpdate::APPLE}, manual);
                 return Item::EMPTY;
             }
             break;
@@ -263,7 +270,7 @@ Item Map::use(int x, int y, Item item) {
             if(tile.get_type() == Item::APPLE) {
                 //this keeps the apple data and passes it to fire
                 //thus data.apple_growth -> data.fire_charcoal
-                push_update({x, y, TileUpdate::BURN}, true);
+                push_update({x, y, TileUpdate::BURN}, manual);
             }
             break;
         case Item::ROBOT:
@@ -294,14 +301,32 @@ void Map::push_update_around(int x, int y, TileUpdate::Type update) {
             break;
         case TileUpdate::BURN:{
             push_update({x, y, TileUpdate::BURN});
-            if(get_tile(x+1, y).get_type() == Item::APPLE)
+            auto tile = get_tile(x+1, y).get_type();
+            if(tile == Item::APPLE || tile == Item::STONE)
                 push_update({x+1, y, TileUpdate::BURN});
-            if(get_tile(x-1, y).get_type() == Item::APPLE)
+            tile = get_tile(x-1, y).get_type();
+            if(tile == Item::APPLE || tile == Item::STONE)
                 push_update({x-1, y, TileUpdate::BURN});
-            if(get_tile(x, y+1).get_type() == Item::APPLE)
+            tile = get_tile(x, y+1).get_type();
+            if(tile == Item::APPLE || tile == Item::STONE)
                 push_update({x, y+1, TileUpdate::BURN});
-            if(get_tile(x, y-1).get_type() == Item::APPLE)
+            tile = get_tile(x, y-1).get_type();
+            if(tile == Item::APPLE || tile == Item::STONE)
                 push_update({x, y-1, TileUpdate::BURN});
+        }break;
+        case TileUpdate::FLOW:{
+            auto tile = get_tile(x+1, y).get_type();
+            if(tile == Item::EMPTY)
+                push_update({x+1, y, TileUpdate::FLOW});
+            tile = get_tile(x-1, y).get_type();
+            if(tile == Item::EMPTY)
+                push_update({x-1, y, TileUpdate::FLOW});
+            tile = get_tile(x, y+1).get_type();
+            if(tile == Item::EMPTY)
+                push_update({x, y+1, TileUpdate::FLOW});
+            tile = get_tile(x, y-1).get_type();
+            if(tile == Item::EMPTY)
+                push_update({x, y-1, TileUpdate::FLOW});
         }break;
     }
 }
@@ -333,18 +358,47 @@ void Map::tick_update(TileUpdate update) {
             //this is the same as apple growth 
             //thus just assigning the type is fine
             const Tile& tile = get_tile(x, y);
-            if(tile.get_type() == Item::FIRE) {
-                if(tile.data) {
-                    get_tile_ref(x, y) = Tile(Item::CHARCOAL);
-                } else {
-                    get_tile_ref(x, y) = Tile(Item::EMPTY);
-                }
-            } else if(tile.get_type() == Item::APPLE) {
-                get_tile_ref(x, y).type = Item::FIRE;
-                push_update_around(x, y, TileUpdate::BURN);
-            } else {
-                get_tile_ref(x, y) = Tile(Item::FIRE);
-                push_update_around(x, y, TileUpdate::BURN);
+            switch(tile.get_type()) {
+                case Item::FIRE:
+                    if(tile.data) {
+                        get_tile_ref(x, y) = Tile(Item::CHARCOAL);
+                    } else {
+                        get_tile_ref(x, y) = Tile(Item::EMPTY);
+                    }
+                    break;
+                case Item::APPLE:
+                    get_tile_ref(x, y).type = Item::FIRE;
+                    push_update_around(x, y, TileUpdate::BURN);
+                    break;
+                case Item::STONE:
+                    get_tile_ref(x, y) = Tile(Item::LAVA);       
+                    push_update({x, y, TileUpdate::FLOW});
+                    break;
+                case Item::LAVA:
+                    get_tile_ref(x, y) = Tile(Item::STONE);
+                    break;
+                //can't burn
+                case Item::EMPTY:
+                case Item::ROBOT:
+                case Item::BOX:
+                case Item::PATH:
+                    break;
+                //burn and dissapear
+                case Item::CHARCOAL:
+                    get_tile_ref(x, y) = Tile(Item::FIRE);
+                    push_update({x, y, TileUpdate::BURN});
+                    push_update_around(x, y, TileUpdate::BURN);
+                    break;
+            }
+        }break;
+        case TileUpdate::FLOW:{
+            Item type = get_tile(x, y).get_type();
+            if(type == Item::EMPTY) {
+                get_tile_ref(x, y) = Tile(Item::LAVA);
+                push_update({x, y, TileUpdate::BURN});
+            } else if(type == Item::LAVA) {
+                push_update({x, y, TileUpdate::BURN});
+                push_update_around(x, y, TileUpdate::FLOW);
             }
         }break;
     }

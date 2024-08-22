@@ -9,6 +9,7 @@ enum class Item : short int {
     APPLE,
     FIRE,
     CHARCOAL,
+    LAVA,
     //these items are not used in tiles
     ROBOT,
     BOX,
@@ -24,6 +25,7 @@ const std::unordered_map<Item, const char*>& get_item_name_map() {
         {Item::APPLE, "APPLE"},
         {Item::FIRE, "FIRE"},
         {Item::CHARCOAL, "CHARCOAL"},
+        {Item::LAVA, "LAVA"},
         {Item::ROBOT, "ROBOT"},
         {Item::BOX, "BOX"},
     };

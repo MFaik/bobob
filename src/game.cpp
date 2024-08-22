@@ -236,6 +236,9 @@ void Game::tick(bool mouse, bool keyboard) {
         if(IsKeyDown(KEY_DOWN)) {
             _camera.target.y += 2;
         }
+        if(IsKeyPressed(KEY_ZERO)) {
+            current_item = Item::EMPTY;
+        }
         if(IsKeyPressed(KEY_ONE)) {
             current_item = Item::ROBOT;
         }
@@ -244,6 +247,9 @@ void Game::tick(bool mouse, bool keyboard) {
         }
         if(IsKeyPressed(KEY_THREE)) {
             current_item = Item::FIRE;
+        }
+        if(IsKeyPressed(KEY_FOUR)) {
+            current_item = Item::STONE;
         }
     }
     if(mouse) {
@@ -254,7 +260,7 @@ void Game::tick(bool mouse, bool keyboard) {
             mouse_pos = Vector2(std::floor(mouse_pos.x), std::floor(mouse_pos.y));
             auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y).robot;
             if(robot.empty()) {
-                use(mouse_pos.x, mouse_pos.y, current_item);
+                _map.use(mouse_pos.x, mouse_pos.y, current_item, true);
             } else {
                 g_game_ui.add_robot_window(_robot_allocator.get(robot));
             }

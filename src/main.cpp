@@ -37,6 +37,7 @@ int main() {
     inv[3] = Item::APPLE;
     inv[4] = Item::STONE;
     inv[5] = Item::CHARCOAL;
+    inv[6] = Item::STONE;
     inv[15] = Item::BOX;
     g_game.add_robot(10, 10, inv);
     // 
@@ -56,9 +57,12 @@ int main() {
     g_assets.load_textures();
     while(!g_assets.is_textures_loaded());
 
+    int speed = 1;
+    std::array<int, 4> speed_tick_cnt = { 20, 10, 5, 2 };
+    std::array<const char*, 4> speed_name = {"0.5x", "1x", "2x", "4x"};
     while(!WindowShouldClose()) {
         BeginDrawing();
-        if(fixed_cnt > 3) {
+        if(fixed_cnt > speed_tick_cnt[speed]) {
             g_game.fixed_tick();
             fixed_cnt = 0;
         } else {
@@ -79,7 +83,6 @@ int main() {
             g_game.load_game("test.bobob");
             g_game_ui.set_program_text(g_game.get_program());
         }
-        ImGui::SameLine();
         if(ImGui::Button(g_game.is_paused() ? "Play" : "Pause")) {
             g_game.toggle_pause();
         }
@@ -88,7 +91,13 @@ int main() {
             if(ImGui::Button("Step")) {
                 g_game.fixed_tick(true);
             }
+        } else {
+            ImGui::SameLine();
+            if(ImGui::Button(speed_name[speed])) {
+                speed = (speed+1)%speed_tick_cnt.size();
+            }
         }
+
 
         g_game_ui.draw();
 

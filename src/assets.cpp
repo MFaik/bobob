@@ -26,6 +26,7 @@ void Assets::load_textures() {
     load_texture(Item::EMPTY, 1);
     load_texture(Item::PATH, 1);
     load_texture(Item::ROBOT, 1);
+    load_texture(Item::LAVA, 1);
 }
 
 void Assets::load_texture(Item item, size_t cnt) {
