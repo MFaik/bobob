@@ -49,7 +49,7 @@ void Robot::go_forward() {
     if(front_tile.robot.empty()) {
         _x = x;
         _y = y;
-        _input = (int)g_game.get_tile(x, y).type;
+        _input = (int)g_game.get_tile(x, y).get_type();
     } else {
         //TODO: add proper input id for objects and robot
         //TODO: make this BLOCKED
@@ -61,7 +61,7 @@ void Robot::look() {
     auto [x, y] = get_front();
     const auto& tile = g_game.get_tile(x, y);
     if(tile.robot.empty())
-        _input = (short int)g_game.get_tile(x, y).type;
+        _input = (short int)g_game.get_tile(x, y).get_type();
     else
         _input = (short int)Item::ROBOT;
 }

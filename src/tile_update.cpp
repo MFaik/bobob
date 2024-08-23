@@ -54,7 +54,7 @@ void TileUpdate::update_apple(Map& map) {
     cnt += map.get_tile(x, y+1).get_type() == Item::APPLE;
     cnt += map.get_tile(x, y-1).get_type() == Item::APPLE;
     if(cnt >= 3) {
-        map.get_tile_ref(x, y).data = 1;
+        map.get_tile_ref(x, y).set_apple_grow(true);
     }
 }
 
@@ -62,18 +62,14 @@ void TileUpdate::update_burn(Map& map) {
     const Tile& tile = map.get_tile(x, y);
     switch(tile.get_type()) {
         case Item::FIRE:
-            if(tile.data) {
+            if(tile.is_fire_charcoal()) {
                 map.get_tile_ref(x, y) = Tile(Item::CHARCOAL);
             } else {
                 map.get_tile_ref(x, y) = Tile(Item::EMPTY);
             }
             break;
         case Item::APPLE:
-            //TODO: remove this
-            //fire data 0 -> empty, 1 -> charcoal
-            //this is the same as apple growth 
-            //thus just assigning the type is fine
-            map.get_tile_ref(x, y).type = Item::FIRE;
+            map.get_tile_ref(x, y) = Tile(Item::FIRE, tile.is_apple_grow());
             push_update_around(map, BURN);
             break;
         case Item::STONE:

@@ -71,10 +71,11 @@ void Game::load_game(std::string file_name) {
         std::array<int, 2> chunk_pos = *((std::array<int, 2>*)file);
         file += sizeof(std::array<int, 2>);
         for(size_t t = 0;t < sizeof(Chunk::tiles)/sizeof(Tile);t++) {
-            chunk.tiles[t].type = *((Item*)file);
-            file += sizeof(Tile::type);
-            chunk.tiles[t].data = *((decltype(Tile::data)*)file);
-            file += sizeof(Tile::data);
+            Item type = *((Item*)file);
+            file += sizeof(Item);
+            TileData data =  *((TileData*)file);
+            file += sizeof(TileData);
+            chunk.tiles[t] = Tile(type, data);
         }
         _map.load_chunk(chunk_pos, chunk);
     }
@@ -127,7 +128,7 @@ void Game::save_game(std::string file_name) {
     for(auto& c : chunks) {
         file << to_bytes(c.first);
         for(Tile t : c.second.tiles) {
-            file << to_bytes(t.type) << to_bytes(t.data);
+            file << to_bytes(t);
         }
     }
     for(auto r : _robots) {

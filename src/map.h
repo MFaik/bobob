@@ -9,24 +9,9 @@
 #include "item.h"
 #include "util.h"
 #include "tile_update.h"
+#include "tile.h"
 
 class Robot;
-
-//TODO: check if seperating the tile enum data and health into 
-//seperate arrays can help memory layout
-struct Tile {
-public:
-    Item type = Item::EMPTY;
-    short int data = 0;
-    ArenaPointer<Robot> robot;
-    Tile(Item type, short int data) : type(type), data(data) {}
-    Tile(Item type): type(type) {}
-    Tile(){}
-    bool operator==(const Tile& tile) const&;
-    bool empty() const&;
-    Item get_type() const&;
-    short int get_item_cnt() const&;
-};
 
 constexpr int CHUNK_SIZE = 32;
 enum class WorldGeneration{
