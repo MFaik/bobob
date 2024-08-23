@@ -257,7 +257,7 @@ void Game::tick(bool mouse, bool keyboard) {
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             Vector2 mouse_pos = GetScreenToWorld2D(GetMousePosition(), _camera);
             mouse_pos = Vector2Scale(mouse_pos, 1.0f/TILE_SIZE);
-            mouse_pos = Vector2(std::floor(mouse_pos.x), std::floor(mouse_pos.y));
+            mouse_pos = Vector2{std::floor(mouse_pos.x), std::floor(mouse_pos.y)};
             auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y).robot;
             if(robot.empty()) {
                 _map.use(mouse_pos.x, mouse_pos.y, current_item, true);
