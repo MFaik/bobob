@@ -8,20 +8,9 @@
 #include "arena_allocator.h"
 #include "item.h"
 #include "util.h"
+#include "tile_update.h"
 
 class Robot;
-
-struct TileUpdate {
-    int x;
-    int y;
-    //these are defined in priority order
-    enum Type {
-        BURN,
-        APPLE,
-        FLOW,
-    } type;
-    TileUpdate(int x, int y, Type type):x(x), y(y), type(type) {}
-};
 
 //TODO: check if seperating the tile enum data and health into 
 //seperate arrays can help memory layout
@@ -82,10 +71,6 @@ public:
     void remove_robot(int x, int y);
     ArenaPointer<Robot> get_robot(int x, int y);
     Item use(int x, int y, Item item, bool manual = false);
-private:
-    void push_update_around(int x, int y, TileUpdate::Type update);
     void push_update(TileUpdate update, bool first = false);
-    void tick_update(TileUpdate update);
-public:
     void tick();
 };

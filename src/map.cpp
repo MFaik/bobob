@@ -295,112 +295,11 @@ Item Map::use(int x, int y, Item item, bool manual) {
     return item;
 }
 
-void Map::push_update_around(int x, int y, TileUpdate::Type update) {
-    switch(update) {
-        case TileUpdate::APPLE:
-            break;
-        case TileUpdate::BURN:{
-            push_update({x, y, TileUpdate::BURN});
-            auto tile = get_tile(x+1, y).get_type();
-            if(tile == Item::APPLE || tile == Item::STONE)
-                push_update({x+1, y, TileUpdate::BURN});
-            tile = get_tile(x-1, y).get_type();
-            if(tile == Item::APPLE || tile == Item::STONE)
-                push_update({x-1, y, TileUpdate::BURN});
-            tile = get_tile(x, y+1).get_type();
-            if(tile == Item::APPLE || tile == Item::STONE)
-                push_update({x, y+1, TileUpdate::BURN});
-            tile = get_tile(x, y-1).get_type();
-            if(tile == Item::APPLE || tile == Item::STONE)
-                push_update({x, y-1, TileUpdate::BURN});
-        }break;
-        case TileUpdate::FLOW:{
-            auto tile = get_tile(x+1, y).get_type();
-            if(tile == Item::EMPTY)
-                push_update({x+1, y, TileUpdate::FLOW});
-            tile = get_tile(x-1, y).get_type();
-            if(tile == Item::EMPTY)
-                push_update({x-1, y, TileUpdate::FLOW});
-            tile = get_tile(x, y+1).get_type();
-            if(tile == Item::EMPTY)
-                push_update({x, y+1, TileUpdate::FLOW});
-            tile = get_tile(x, y-1).get_type();
-            if(tile == Item::EMPTY)
-                push_update({x, y-1, TileUpdate::FLOW});
-        }break;
-    }
-}
-
 void Map::push_update(TileUpdate update, bool first) {
     if(g_game.is_paused() && first) {
-        tick_update(update);
+        update.update(*this);
     } else {
         _tile_updates.push_back(update);
-    }
-}
-
-void Map::tick_update(TileUpdate update) {
-    auto [x, y, update_type] = update;
-    switch(update_type) {
-        case TileUpdate::APPLE:{
-            int cnt = 0;
-            cnt += get_tile(x+1, y).get_type() == Item::APPLE;
-            cnt += get_tile(x-1, y).get_type() == Item::APPLE;
-            cnt += get_tile(x, y+1).get_type() == Item::APPLE;
-            cnt += get_tile(x, y-1).get_type() == Item::APPLE;
-            if(cnt >= 3) {
-                get_tile_ref(x, y).data = 1;
-            }
-        }break;
-        case TileUpdate::BURN:{
-            //TODO:
-            //fire data 0 -> empty, 1 -> charcoal
-            //this is the same as apple growth 
-            //thus just assigning the type is fine
-            const Tile& tile = get_tile(x, y);
-            switch(tile.get_type()) {
-                case Item::FIRE:
-                    if(tile.data) {
-                        get_tile_ref(x, y) = Tile(Item::CHARCOAL);
-                    } else {
-                        get_tile_ref(x, y) = Tile(Item::EMPTY);
-                    }
-                    break;
-                case Item::APPLE:
-                    get_tile_ref(x, y).type = Item::FIRE;
-                    push_update_around(x, y, TileUpdate::BURN);
-                    break;
-                case Item::STONE:
-                    get_tile_ref(x, y) = Tile(Item::LAVA);       
-                    push_update({x, y, TileUpdate::FLOW});
-                    break;
-                case Item::LAVA:
-                    get_tile_ref(x, y) = Tile(Item::STONE);
-                    break;
-                //can't burn
-                case Item::EMPTY:
-                case Item::ROBOT:
-                case Item::BOX:
-                case Item::PATH:
-                    break;
-                //burn and dissapear
-                case Item::CHARCOAL:
-                    get_tile_ref(x, y) = Tile(Item::FIRE);
-                    push_update({x, y, TileUpdate::BURN});
-                    push_update_around(x, y, TileUpdate::BURN);
-                    break;
-            }
-        }break;
-        case TileUpdate::FLOW:{
-            Item type = get_tile(x, y).get_type();
-            if(type == Item::EMPTY) {
-                get_tile_ref(x, y) = Tile(Item::LAVA);
-                push_update({x, y, TileUpdate::BURN});
-            } else if(type == Item::LAVA) {
-                push_update({x, y, TileUpdate::BURN});
-                push_update_around(x, y, TileUpdate::FLOW);
-            }
-        }break;
     }
 }
 
@@ -409,7 +308,9 @@ void Map::tick() {
         return;
     std::vector<TileUpdate> curr(_tile_updates);
     _tile_updates.clear();
-    //lower priority updates are cancelled
+    // TODO: move this to its own function?
+    // make sure to change tileupdate x y and type to private
+    // lower priority updates are cancelled
     auto compare = [](TileUpdate l, TileUpdate r) {
         if(l.x != r.x)
             return l.x < r.x;
@@ -424,7 +325,7 @@ void Map::tick() {
     auto last = std::unique(curr.begin(), curr.end(), eq);
 
     for(auto it = curr.begin();it != last;it++){ 
-        tick_update(*it);
+        it->update(*this);
     }
 }
 
