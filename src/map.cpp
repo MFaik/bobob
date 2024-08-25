@@ -112,15 +112,29 @@ Item Map::use(int x, int y, Item item, bool manual) {
     const Tile& tile = get_tile(x, y);
     switch(item) {
         case Item::EMPTY:
-            if(tile.get_type() == Item::BOX) {
-                return get_tile_ref(x, y).remove_box_item();
-            }
-            if(tile.get_type() == Item::APPLE) {
-                if(tile.is_apple_grow())
-                    get_tile_ref(x, y).set_apple_grow(0);
-                else
+            switch (tile.get_type()) {
+                case Item::BOX:
+                    return get_tile_ref(x, y).remove_box_item();
+                case Item::APPLE:
+                    if(tile.is_apple_grow())
+                        get_tile_ref(x, y).set_apple_grow(0);
+                    else
+                        get_tile_ref(x, y) = Tile(Item::EMPTY);
+                    return Item::APPLE;
+                //non pickable items
+                case Item::FIRE:
+                case Item::LAVA:
+                case Item::ROBOT:
+                case Item::BASE:
+                case Item::PATH:
+                case Item::EMPTY:
+                    break;
+                //items that don't require extra code to pick up
+                case Item::STONE:
+                case Item::CHARCOAL:
+                    Item type = tile.get_type();
                     get_tile_ref(x, y) = Tile(Item::EMPTY);
-                return Item::APPLE;
+                    return type;
             }
             //can't put empty in box
             return Item::EMPTY;
