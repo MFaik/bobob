@@ -46,12 +46,11 @@ std::array<int, 2> Robot::get_front() const {
 void Robot::go_forward() {
     auto [x, y] = get_front();
     const auto& front_tile = g_game.get_tile(x, y);
-    if(front_tile.robot.empty()) {
+    if(front_tile.robot.empty() && front_tile.get_type() != Item::BASE) {
         _x = x;
         _y = y;
         _input = (int)g_game.get_tile(x, y).get_type();
     } else {
-        //TODO: add proper input id for objects and robot
         //TODO: make this BLOCKED
         _input = 999;
     }

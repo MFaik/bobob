@@ -39,6 +39,14 @@ Item Tile::get_type() const& {
         return type;
 }
 
+Item Tile::get_raw_type() const& {
+    return type;
+}
+
+TileData Tile::get_raw_data() const& {
+    return data;
+}
+
 //this function assumes tile is a box
 Item Tile::get_box_item() const& {
     return type;
@@ -102,9 +110,11 @@ void Tile::draw(int x, int y) const& {
         case Item::EMPTY:
         case Item::ROBOT:
             break;
+        //data = texture_variation
+        case Item::BASE:
         case Item::FIRE:
             DrawTexturePro(
-                g_assets.get_texture(Item::FIRE, data),
+                g_assets.get_texture(get_type(), data),
                 Rectangle{0, 0, 50, 50}, 
                 Rectangle{ (float)x*TILE_SIZE+TILE_SIZE/2.0f, 
                            (float)y*TILE_SIZE+TILE_SIZE/2.0f, 
@@ -142,7 +152,7 @@ void Tile::draw(int x, int y) const& {
                 );
             DrawText(std::to_string(get_box_item_cnt()).c_str(), 
                     x*TILE_SIZE+TILE_SIZE*0.6f, y*TILE_SIZE+TILE_SIZE*0.5f, 
-                    12, WHITE);
+                    30, WHITE);
             break;
         case Item::CHARCOAL:
         case Item::PATH:

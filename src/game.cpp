@@ -22,9 +22,11 @@ extern Assets g_assets;
 Game g_game;
 
 Game::Game() : _robot_allocator() {
-    _camera = {0, 0, 0, 0, 0, 0};
-    _camera.zoom = 2;
     setup_program(parse_program(""));
+}
+
+void Game::set_camera(Camera2D camera) {
+    _camera = camera;
 }
 
 //TODO: add proper error handling
@@ -128,7 +130,8 @@ void Game::save_game(std::string file_name) {
     for(auto& c : chunks) {
         file << to_bytes(c.first);
         for(Tile t : c.second.tiles) {
-            file << to_bytes(t);
+            file << to_bytes(t.get_raw_type());
+            file << to_bytes(t.get_raw_data());
         }
     }
     for(auto r : _robots) {
@@ -219,23 +222,46 @@ void Game::draw() {
             _map.draw(x, y);
         }
     }
+    //TODO: URGENT!!!! Make a better system for rendering ui
+    DrawText(std::to_string(_base_items[Item::APPLE]).c_str(), 50, 25, 30, BLACK);
+    DrawTexturePro(
+        g_assets.get_texture(Item::APPLE, 0),
+        Rectangle{0, 0, 50, 50}, 
+        Rectangle{40, 40, 40, 40}, 
+        Vector2{TILE_SIZE/2.0, TILE_SIZE/2.0}, 0, WHITE
+    );
+    DrawText(std::to_string(_base_items[Item::CHARCOAL]).c_str(), 50, 60, 30, BLACK);
+    DrawTexturePro(
+        g_assets.get_texture(Item::CHARCOAL, 0),
+        Rectangle{0, 0, 50, 50}, 
+        Rectangle{40, 75, 40, 40}, 
+        Vector2{TILE_SIZE/2.0, TILE_SIZE/2.0}, 0, WHITE
+    );
+    DrawText(std::to_string(_base_items[Item::STONE]).c_str(), 50, 95, 30, BLACK);
+    DrawTexturePro(
+        g_assets.get_texture(Item::STONE, 0),
+        Rectangle{0, 0, 50, 50}, 
+        Rectangle{44, 120, 30, 30}, 
+        Vector2{TILE_SIZE/2.0, TILE_SIZE/2.0}, 0, WHITE
+    );
     
     EndMode2D();
 }
 
 void Game::tick(bool mouse, bool keyboard) {
     if(keyboard) {
+        int speed = 20/_camera.zoom;
         if(IsKeyDown(KEY_RIGHT)) {
-            _camera.target.x += 2;
+            _camera.target.x += speed;
         }
         if(IsKeyDown(KEY_LEFT)) {
-            _camera.target.x -= 2;
+            _camera.target.x -= speed;
         }
         if(IsKeyDown(KEY_UP)) {
-            _camera.target.y -= 2;
+            _camera.target.y -= speed;
         }
         if(IsKeyDown(KEY_DOWN)) {
-            _camera.target.y += 2;
+            _camera.target.y += speed;
         }
         if(IsKeyPressed(KEY_ZERO)) {
             current_item = Item::EMPTY;
@@ -308,6 +334,12 @@ void Game::toggle_pause() {
 
 bool Game::is_paused() {
     return _paused;
+}
+
+bool Game::add_item_to_base(Item item) {
+    //TODO: return false on unaddable items
+    _base_items[item]++;
+    return true;
 }
 
 Game::~Game() {

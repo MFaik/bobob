@@ -30,7 +30,7 @@ void Map::load_chunk(std::array<int, 2> pos, Chunk& chunk) {
 ArenaPointer<Chunk> Map::generate_chunk(int chunk_x, int chunk_y) {
     auto chunk = _chunk_allocator.allocate();
     _chunks[{chunk_x, chunk_y}] = chunk;
-    _chunk_allocator.get(chunk)->generate(_world_generation);
+    _chunk_allocator.get(chunk)->generate(chunk_x, chunk_y, _world_generation);
     return chunk;
 }
 
@@ -58,9 +58,9 @@ std::vector<std::pair<std::array<int, 2>, Chunk>> Map::get_all_chunks() {
     return ret;
 }
 
-inline int Map::global_to_local(int x, int y) {
-    return ((x%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE)*CHUNK_SIZE +
-        ((y%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE);
+int Map::global_to_local(int x, int y) {
+    return ((x%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE) +
+        ((y%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE)*CHUNK_SIZE;
 }
 
 //TODO: we can remove the conditional if the chunk is guaranteed to exist
@@ -175,12 +175,20 @@ Item Map::use(int x, int y, Item item, bool manual) {
                 return Item::EMPTY;
             }
             return Item::ROBOT;
+        //unusable items
+        case Item::BASE:
+            return Item::EMPTY;
     }
     
     if(tile.get_type() == Item::BOX) {
         if(get_tile_ref(x, y).add_box_item(item))
             return Item::EMPTY;
     }
+    if(tile.get_type() == Item::BASE) {
+        if(g_game.add_item_to_base(item))
+            return Item::EMPTY;
+    }
+
     return item;
 }
 
@@ -219,7 +227,7 @@ void Map::tick() {
 }
 
 
-void Chunk::generate(WorldGeneration world_gen) {
+void Chunk::generate(int chunk_x, int chunk_y, WorldGeneration world_gen) {
     edited = false;
     switch(world_gen) {
         case WorldGeneration::EMPTY:
@@ -229,5 +237,12 @@ void Chunk::generate(WorldGeneration world_gen) {
                 t = Tile(Item::STONE);
             }
             break;
+    }
+    if(chunk_x == 0 && chunk_y == 0) {
+        for(int y = 0;y < 3;y++) {
+            for(int x = 0;x < 3;x++) {
+                tiles[x+y*CHUNK_SIZE] = Tile(Item::BASE, x+y*3);
+            }
+        }
     }
 }

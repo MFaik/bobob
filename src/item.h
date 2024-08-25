@@ -13,6 +13,8 @@ enum class Item : short int {
     //these items are not used in tiles
     ROBOT,
     BOX,
+    //TODO: find a better way to make multitile structures
+    BASE,
 };
 
 //TODO: fix this
@@ -28,6 +30,7 @@ const std::unordered_map<Item, const char*>& get_item_name_map() {
         {Item::LAVA, "LAVA"},
         {Item::ROBOT, "ROBOT"},
         {Item::BOX, "BOX"},
+        {Item::BASE, "BASE"},
     };
     return item_name_map;
 }

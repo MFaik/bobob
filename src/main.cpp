@@ -39,7 +39,7 @@ int main() {
     inv[5] = Item::CHARCOAL;
     inv[6] = Item::STONE;
     inv[15] = Item::BOX;
-    g_game.add_robot(10, 10, inv);
+    g_game.add_robot(-1, -1, inv);
     // 
     // for(int y = 10;y < 1000;y++) {
     //     for(int x = 10;x < 1000;x++) {
@@ -56,6 +56,11 @@ int main() {
 
     g_assets.load_textures();
     while(!g_assets.is_textures_loaded());
+    
+    Camera2D camera{};
+    camera.target = {-GetScreenWidth()/2.0f, -GetScreenHeight()/2.0f};
+    camera.zoom = 1;
+    g_game.set_camera(camera);
 
     int speed = 1;
     std::array<int, 4> speed_tick_cnt = { 20, 10, 5, 2 };

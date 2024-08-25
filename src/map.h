@@ -23,7 +23,7 @@ struct Chunk {
     std::array<Tile, CHUNK_SIZE*CHUNK_SIZE> tiles;
     bool edited = false;
     
-    void generate(WorldGeneration a);
+    void generate(int chunk_x, int chunk_y, WorldGeneration a);
 };
 
 class Map {

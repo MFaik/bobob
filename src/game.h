@@ -8,7 +8,7 @@
 
 class Robot;
 
-constexpr float TILE_SIZE = 20;
+constexpr float TILE_SIZE = 50;
 
 class Game {
 private:
@@ -21,8 +21,11 @@ private:
     std::vector<ArenaPointer<Robot>> _robots;
 
     bool _paused = false;
+
+    std::unordered_map<Item, unsigned int> _base_items;
 public:
     Game();
+    void set_camera(Camera2D camera);
     void load_game(std::string file_name);
     void save_game(std::string file_name);
     void setup_program(Program program, bool reset_robots = true);
@@ -45,5 +48,8 @@ public:
 
     void toggle_pause();
     bool is_paused();
+
+    bool add_item_to_base(Item item);
+
     ~Game();
 };

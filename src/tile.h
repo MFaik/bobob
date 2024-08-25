@@ -20,6 +20,9 @@ public:
     bool empty() const&;
     Item get_type() const&;
 
+    Item get_raw_type() const&;
+    TileData get_raw_data() const&;
+
     //box functions
     Item get_box_item() const&;
     short int get_box_item_cnt() const&;

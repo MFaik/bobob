@@ -90,6 +90,7 @@ void TileUpdate::update_burn(Map& map) {
         case Item::ROBOT:
         case Item::BOX:
         case Item::PATH:
+        case Item::BASE:
             break;
     }
 }
