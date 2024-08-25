@@ -63,7 +63,11 @@ endif
 
 .PHONY: clean
 clean:
+ifneq ($(OS), Windows_NT)
+	find $(BUILD_DIR)/* -type f | grep -v "imgui/*" | xargs rm -r
+else
 	rm -r $(BUILD_DIR)
+endif
 
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those
