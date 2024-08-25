@@ -121,7 +121,7 @@ Item Map::use(int x, int y, Item item, bool manual) {
                     else
                         get_tile_ref(x, y) = Tile(Item::EMPTY);
                     return Item::APPLE;
-
+                //non pickable items
                 case Item::FIRE:
                 case Item::LAVA:
                 case Item::ROBOT:
@@ -129,6 +129,7 @@ Item Map::use(int x, int y, Item item, bool manual) {
                 case Item::PATH:
                 case Item::EMPTY:
                     break;
+                //items that don't require extra code to pick up
                 case Item::STONE:
                 case Item::CHARCOAL:
                     Item type = tile.get_type();
