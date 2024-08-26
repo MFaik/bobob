@@ -1,9 +1,7 @@
 #include "tile.h"
 
 #include "item.h"
-
 #include "game.h"
-extern Game g_game;
 
 #include "assets.h"
 extern Assets g_assets;
@@ -24,7 +22,6 @@ Tile::Tile(Item type, short int data) : type(type), data(data) {
         this->data = BOX|data;
     }
 }
-
 
 bool Tile::operator==(const Tile& tile) const& {
     return tile.type == type && tile.data == data;
@@ -105,7 +102,7 @@ void Tile::set_fire_charcoal(bool charcoal) {
     data = charcoal;
 }
 
-void Tile::draw(int x, int y) const& {
+void Tile::draw(int x, int y, Game& game) const& {
     switch (get_type()) {
         case Item::EMPTY:
         case Item::ROBOT:
@@ -177,8 +174,7 @@ void Tile::draw(int x, int y) const& {
                        (float)y*TILE_SIZE+TILE_SIZE/2.0f, 
                        TILE_SIZE, TILE_SIZE }, 
             Vector2{TILE_SIZE/2.0, TILE_SIZE/2.0}, 
-            g_game.get_robot(robot)->_dir*90, WHITE
+            game.get_robot(robot)->_dir*90, WHITE
         );
     }
 }
-

@@ -19,9 +19,7 @@ extern GameUI g_game_ui;
 #include "assets.h"
 extern Assets g_assets;
 
-Game g_game;
-
-Game::Game() : _robot_allocator() {
+Game::Game() : _map(*this), _robot_allocator() {
     setup_program(parse_program(""));
 }
 
@@ -319,7 +317,7 @@ void Game::fixed_tick(bool ignore_pause) {
     for(ArenaPointer<Robot> r_ptr : _robots) {
         auto r = _robot_allocator.get(r_ptr);
         int x = r->_x, y = r->_y;
-        _program.tick(*r);
+        _program.tick(*r, _map);
         if(x != r->_x || y != r->_y) {
             _map.remove_robot(x, y);
             _map.add_robot(r->_x, r->_y, r_ptr);

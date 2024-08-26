@@ -8,7 +8,7 @@ GameUI g_game_ui;
 
 GameUI::GameUI() : _program_window("program.bobob"){}
 
-void GameUI::draw() {
+void GameUI::draw(Game& game) {
     for(auto rw = _robot_windows.begin();rw != _robot_windows.end();) {
         auto curr = rw;
         rw++;
@@ -16,7 +16,7 @@ void GameUI::draw() {
             _robot_windows.erase(curr);
         }
     }
-    _program_window.draw();
+    _program_window.draw(game);
 }
 
 void GameUI::add_robot_window(Robot* robot) {

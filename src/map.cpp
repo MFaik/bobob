@@ -3,16 +3,14 @@
 
 #include "map.h"
 #include "robot.h"
-
 #include "game.h"
-extern Game g_game;
 
 template class ArenaAllocator<Chunk>;
 
 //TODO: fix 50 magic number
 //TODO: fix drawing
 void Map::draw(int x, int y) {
-    get_tile(x, y).draw(x, y);
+    get_tile(x, y).draw(x, y, _game);
 }
 
 void Map::resize_chunks(size_t size) {
@@ -58,7 +56,7 @@ std::vector<std::pair<std::array<int, 2>, Chunk>> Map::get_all_chunks() {
     return ret;
 }
 
-int Map::global_to_local(int x, int y) {
+int Map::global_to_local(int x, int y) const& {
     return ((x%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE) +
         ((y%CHUNK_SIZE+CHUNK_SIZE)%CHUNK_SIZE)*CHUNK_SIZE;
 }
@@ -185,7 +183,7 @@ Item Map::use(int x, int y, Item item, bool manual) {
             break;
         case Item::ROBOT:
             if(tile.robot.empty()) {
-                g_game.add_robot(x, y);
+                _game.add_robot(x, y);
                 return Item::EMPTY;
             }
             return Item::ROBOT;
@@ -199,7 +197,7 @@ Item Map::use(int x, int y, Item item, bool manual) {
             return Item::EMPTY;
     }
     if(tile.get_type() == Item::BASE) {
-        if(g_game.add_item_to_base(item))
+        if(_game.add_item_to_base(item))
             return Item::EMPTY;
     }
 
@@ -207,7 +205,7 @@ Item Map::use(int x, int y, Item item, bool manual) {
 }
 
 void Map::push_update(TileUpdate update, bool first) {
-    if(g_game.is_paused() && first) {
+    if(_game.is_paused() && first) {
         update.update(*this);
     } else {
         _tile_updates.push_back(update);

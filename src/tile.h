@@ -4,6 +4,7 @@
 #include "arena_allocator.h"
 
 class Robot;
+class Game;
 
 typedef short int TileData;
 
@@ -35,6 +36,6 @@ public:
     bool is_fire_charcoal() const&;
     void set_fire_charcoal(bool charcoal);
     
-    void draw(int x, int y) const&;
+    void draw(int x, int y, Game& game) const&;
 };
 

@@ -12,6 +12,7 @@
 #include "tile.h"
 
 class Robot;
+class Game;
 
 constexpr int CHUNK_SIZE = 32;
 enum class WorldGeneration{
@@ -28,15 +29,21 @@ struct Chunk {
 
 class Map {
 private:
+    Game& _game;
+public:
+    Map(Game& game): _game(game){}
+
+private:
     ArenaAllocator<Chunk> _chunk_allocator;
     std::unordered_map<std::array<int, 2>, ArenaPointer<Chunk>> _chunks;
     WorldGeneration _world_generation = WorldGeneration::EMPTY;
 
+    std::vector<TileUpdate> _tile_updates;
+
+
     Color get_tile_color(Tile tile_type);
     ArenaPointer<Chunk> generate_chunk(int x, int y);
     void unload_chunk(int x, int y);
-
-    std::vector<TileUpdate> _tile_updates;
 public:
     void resize_chunks(size_t size);
     void load_chunk(std::array<int, 2> pos, Chunk& chunk);
@@ -44,9 +51,10 @@ public:
     std::vector<std::pair<std::array<int, 2>, Chunk>> get_all_chunks();
 
 private:
-    inline int global_to_local(int x, int y);
+    int global_to_local(int x, int y) const&;
     Chunk& get_chunk(int x, int y);
     Tile& get_tile_internal(int x, int y);
+
 public:
     void draw(int x, int y);
     const Tile& get_tile(int x, int y);

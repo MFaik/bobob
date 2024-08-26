@@ -4,13 +4,12 @@
 
 #include "program_parser.h"
 #include "game.h"
-extern Game g_game;
 
 ProgramWindow::ProgramWindow(std::string title) : _title(title), _editor() {
     _editor.SetLanguageDefinition(TextEditor::LanguageDefinition::Bobob());
 }
 
-bool ProgramWindow::draw() {
+bool ProgramWindow::draw(Game &game) {
     ImGuiWindowFlags flag = 0;
     flag |= ImGuiWindowFlags_NoCollapse;
     flag |= ImGuiWindowFlags_MenuBar;
@@ -32,7 +31,7 @@ bool ProgramWindow::draw() {
                         _editor.SetErrorMarkers(errors);
                     }
                 } else {
-                    g_game.setup_program(program);
+                    game.setup_program(program);
                 }
             }
             ImGui::EndMenuBar();

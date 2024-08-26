@@ -1,9 +1,9 @@
 #include "robot.h"
+
 #include <algorithm>
 #include <iostream>
 
-#include "game.h"
-extern Game g_game;
+#include <map.h>
 
 Robot::Robot(int x, int y) : _x(x), _y(y) {}
 
@@ -43,24 +43,24 @@ std::array<int, 2> Robot::get_front() const {
     return {_x, _y};
 }
 
-void Robot::go_forward() {
+void Robot::go_forward(Map& map) {
     auto [x, y] = get_front();
-    const auto& front_tile = g_game.get_tile(x, y);
+    const auto& front_tile = map.get_tile(x, y);
     if(front_tile.robot.empty() && front_tile.get_type() != Item::BASE) {
         _x = x;
         _y = y;
-        _input = (int)g_game.get_tile(x, y).get_type();
+        _input = (int)map.get_tile(x, y).get_type();
     } else {
         //TODO: make this BLOCKED
         _input = 999;
     }
 }
 
-void Robot::look() {
+void Robot::look(Map& map) {
     auto [x, y] = get_front();
-    const auto& tile = g_game.get_tile(x, y);
+    const auto& tile = map.get_tile(x, y);
     if(tile.robot.empty())
-        _input = (short int)g_game.get_tile(x, y).get_type();
+        _input = (short int)map.get_tile(x, y).get_type();
     else
         _input = (short int)Item::ROBOT;
 }
@@ -74,12 +74,12 @@ void Robot::select(unsigned int i) {
     }
 }
 
-void Robot::use() {
+void Robot::use(Map& map) {
     //TODO: the use function will be changed completely
     //and use the health parameter
     auto [x, y] = get_front();
     auto& item = _inventory[std::min(_sel, 16u)];
-    item = g_game.use(x, y, item);
+    item = map.use(x, y, item);
 }
 
 void Robot::sleep(unsigned int ticks) {

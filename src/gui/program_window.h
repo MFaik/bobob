@@ -3,6 +3,8 @@
 #include <string>
 #include "text_editor.h"
 
+class Game;
+
 class ProgramWindow {
 private:
     std::string _title;
@@ -10,6 +12,6 @@ private:
 public:
     ProgramWindow(std::string title);
 
-    bool draw();
+    bool draw(Game& game);
     void set_text(const std::string& text);
 };

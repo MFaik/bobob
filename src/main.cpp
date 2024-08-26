@@ -3,9 +3,7 @@
 #include "rlImGui.h"
 
 #include "item.h"
-
 #include "game.h"
-extern Game g_game;
 
 #include "game_ui.h"
 extern GameUI g_game_ui;
@@ -39,7 +37,9 @@ int main() {
     inv[5] = Item::CHARCOAL;
     inv[6] = Item::STONE;
     inv[15] = Item::BOX;
-    g_game.add_robot(-1, -1, inv);
+
+    Game game;
+    game.add_robot(-1, -1, inv);
     // 
     // for(int y = 10;y < 1000;y++) {
     //     for(int x = 10;x < 1000;x++) {
@@ -60,7 +60,7 @@ int main() {
     Camera2D camera{};
     camera.target = {-GetScreenWidth()/2.0f, -GetScreenHeight()/2.0f};
     camera.zoom = 1;
-    g_game.set_camera(camera);
+    game.set_camera(camera);
 
     int speed = 1;
     std::array<int, 4> speed_tick_cnt = { 20, 10, 5, 2 };
@@ -68,33 +68,33 @@ int main() {
     while(!WindowShouldClose()) {
         BeginDrawing();
         if(fixed_cnt > speed_tick_cnt[speed]) {
-            g_game.fixed_tick();
+            game.fixed_tick();
             fixed_cnt = 0;
         } else {
             fixed_cnt++;
         }
         
-        g_game.draw();
+        game.draw();
         
         rlImGuiBegin();
 
         //ImGui::ShowDemoWindow();
 
         if(ImGui::Button("Save")) {
-            g_game.save_game("test.bobob");
+            game.save_game("test.bobob");
         }
         ImGui::SameLine();
         if(ImGui::Button("Load")) {
-            g_game.load_game("test.bobob");
-            g_game_ui.set_program_text(g_game.get_program());
+            game.load_game("test.bobob");
+            g_game_ui.set_program_text(game.get_program());
         }
-        if(ImGui::Button(g_game.is_paused() ? "Play" : "Pause")) {
-            g_game.toggle_pause();
+        if(ImGui::Button(game.is_paused() ? "Play" : "Pause")) {
+            game.toggle_pause();
         }
-        if(g_game.is_paused()) {
+        if(game.is_paused()) {
             ImGui::SameLine();
             if(ImGui::Button("Step")) {
-                g_game.fixed_tick(true);
+                game.fixed_tick(true);
             }
         } else {
             ImGui::SameLine();
@@ -103,8 +103,7 @@ int main() {
             }
         }
 
-
-        g_game_ui.draw();
+        g_game_ui.draw(game);
 
         ImGuiHoveredFlags mouse_flag = 0;
         mouse_flag |= ImGuiHoveredFlags_AnyWindow;
@@ -114,7 +113,7 @@ int main() {
         
         rlImGuiEnd();
 
-        g_game.tick(mouse_free, keyboard_free);
+        game.tick(mouse_free, keyboard_free);
 
         DrawFPS(0, 0);
         EndDrawing();

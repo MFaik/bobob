@@ -10,7 +10,7 @@ class GameUI {
 public:
     GameUI();
 
-    void draw();
+    void draw(Game& game);
 
     void add_robot_window(Robot* robot);
     void remove_robot_window(Robot* robot);

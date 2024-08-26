@@ -4,6 +4,8 @@
 
 #include "robot.h"
 
+class Game;
+
 class Program {
 public:
     enum Operation {
@@ -49,7 +51,7 @@ public:
     std::vector<Error> _errors;
     std::string _plain_text;
 public:
-    void tick(Robot &robot);
+    void tick(Robot &robot, Map& map);
 
     unsigned int& get_register(Robot &robot, Robot::Register reg);
     unsigned int& get_assignee(Robot &robot, Instruction ins);

@@ -2,7 +2,7 @@
 
 #include "program.h"
 
-void Program::tick(Robot &robot) {
+void Program::tick(Robot& robot, Map& map) {
     if(robot._sleep_dur) {
         robot._sleep_dur--;
         return;
@@ -66,19 +66,19 @@ void Program::tick(Robot &robot) {
             }
             break;
         case LOOK:
-            robot.look();
+            robot.look(map);
             break;
         case TURN:
             robot.turn((Direction)get_operand(robot, ins));
             break;
         case GO:
-            robot.go_forward();
+            robot.go_forward(map);
             break;
         case SLP:
             robot.sleep(get_operand(robot, ins));
             break;
         case USE:
-            robot.use();
+            robot.use(map);
             break;
         case SEL:
             robot.select(get_operand(robot, ins));

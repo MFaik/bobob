@@ -4,6 +4,8 @@
 
 #include "item.h"
 
+class Map;
+
 enum Direction : char {
     NORTH,
     EAST,
@@ -58,9 +60,9 @@ public:
     Robot(int x, int y);
     Robot(int x, int y, std::array<Item, 16> inventory);
 
-    void go_forward();
-    void look();
+    void go_forward(Map& map);
+    void look(Map& map);
     void select(unsigned int i);
-    void use();
+    void use(Map& map);
     void sleep(unsigned int ticks);
 };
