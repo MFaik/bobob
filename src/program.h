@@ -29,7 +29,6 @@ public:
         GO,
         SLP,
         USE,
-        SEL,
     };
     //TODO: rename this "operand" and "reg" to something else
     struct Instruction {

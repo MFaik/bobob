@@ -30,8 +30,7 @@ std::vector<std::pair<std::string, std::string>> get_op_strs() {
         {"TURN", "TURN C\nTurns to C, C can be relative or absolute."},
         {"GO", "GO\nGo forward. Writes BLOCKED to INPUT if forward is blocked."},
         {"SLP", "SLP C\nSleep C cycles."},
-        {"USE", "USE\nUse the currently selected item."},
-        {"SEL", "SEL C\nSelect item C."},
+        {"USE", "USE C\nUse the Cth item"},
     };
 }
 
@@ -61,16 +60,15 @@ public:
         {"GO", Program::GO},
         {"SLP", Program::SLP},
         {"USE", Program::USE},
-        {"SEL", Program::SEL},
     };
 
     const std::unordered_map<std::string, Robot::Register> reg_map = {
         {"A", Robot::A},
         {"B", Robot::B},
+        {"C", Robot::C},
         {"PC", Robot::PC},
         {"COND", Robot::Cond},
         {"INPUT", Robot::Input},
-        {"SEL", Robot::Sel},
     };
 
 
@@ -94,8 +92,7 @@ public:
         {Program::TURN, 1},
         {Program::GO, 0},
         {Program::SLP, 1},
-        {Program::USE, 0},
-        {Program::SEL, 1},
+        {Program::USE, 1},
     };
 private: 
     Program program;

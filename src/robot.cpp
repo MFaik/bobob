@@ -14,7 +14,7 @@ int Robot::get_tile_parity() const {
     return _x%3+_y%3;
 }
 
-unsigned int& Robot::get_register(Register reg) {
+RegisterData& Robot::get_register(Register reg) {
     return this->*Robot::regs[reg];
 }
 
@@ -65,23 +65,18 @@ void Robot::look(Map& map) {
         _input = (short int)Item::ROBOT;
 }
 
-void Robot::select(unsigned int i) {
-    if(i < sizeof(_inventory)/sizeof(_inventory[0])) {
-        _sel = i;
-        _input = (short int)_inventory[std::min(i, 16u)];
-    } else {
-        _input = 0;
-    }
-}
-
-void Robot::use(Map& map) {
+void Robot::use(Map& map, RegisterData sel) {
     //TODO: the use function will be changed completely
     //and use the health parameter
     auto [x, y] = get_front();
-    auto& item = _inventory[std::min(_sel, 16u)];
+    auto& item = _inventory[std::min(sel, 16u)];
     item = map.use(x, y, item);
 }
 
 void Robot::sleep(unsigned int ticks) {
     _sleep_dur = ticks;
+}
+
+bool Robot::operator==(const Robot& other) {
+    
 }

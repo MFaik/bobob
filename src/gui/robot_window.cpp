@@ -48,9 +48,9 @@ bool RobotWindow::draw() {
             ImGui::Text("B: %d", _robot->_b);
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::Text("INPUT: %d", _robot->_input);
+            ImGui::Text("C: %d", _robot->_c);
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text("SEL: %d", _robot->_sel);
+            ImGui::Text("INPUT: %d", _robot->_input);
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             ImGui::Text("COND: %d", _robot->_cond);

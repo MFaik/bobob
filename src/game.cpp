@@ -19,7 +19,7 @@ extern GameUI g_game_ui;
 extern Assets g_assets;
 
 Game::Game() : _map(*this), _robot_allocator() {
-    setup_program(parse_program(""));
+    //setup_program(parse_program(""));
 }
 
 void Game::set_camera(Camera2D camera) {

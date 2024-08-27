@@ -10,7 +10,7 @@ void Program::tick(Robot& robot, Map& map) {
     if(robot._pc >= _code.size())
         return;
     Instruction ins = _code[robot._pc];
-    
+
     switch(ins.op) {
         case NOP:
             break;
@@ -51,18 +51,18 @@ void Program::tick(Robot& robot, Map& map) {
         //Jumps have -1 to allow unconditional _pc++;
         case JMP:
             get_register(robot, Robot::PC) = 
-                _labels[get_operand(robot, ins)%_labels.size()] - 1;
+                _labels[get_operand(robot, ins)] - 1;
             break;
         case JEQ:
             if(!get_register(robot, Robot::Cond)) {
                 get_register(robot, Robot::PC) = 
-                    _labels[get_operand(robot, ins)%_labels.size()] - 1;
+                    _labels[get_operand(robot, ins)] - 1;
             }
             break;
         case JNE:
             if(get_register(robot, Robot::Cond)) {
                 get_register(robot, Robot::PC) = 
-                    _labels[get_operand(robot, ins)%_labels.size()] - 1;
+                    _labels[get_operand(robot, ins)] - 1;
             }
             break;
         case LOOK:
@@ -78,10 +78,7 @@ void Program::tick(Robot& robot, Map& map) {
             robot.sleep(get_operand(robot, ins));
             break;
         case USE:
-            robot.use(map);
-            break;
-        case SEL:
-            robot.select(get_operand(robot, ins));
+            robot.use(map, get_operand(robot, ins));
             break;
         default:
             //TODO: add better error handling
@@ -90,15 +87,15 @@ void Program::tick(Robot& robot, Map& map) {
     robot._pc++;
 }
 
-unsigned int& Program::get_register(Robot &robot, Robot::Register reg) {
+RegisterData& Program::get_register(Robot &robot, Robot::Register reg) {
     return robot.get_register(reg);
 }
 
-unsigned int& Program::get_assignee(Robot &robot, const Instruction ins) {
+RegisterData& Program::get_assignee(Robot &robot, const Instruction ins) {
     return get_register(robot, ins.reg);
 }
 
-unsigned int Program::get_operand(Robot &robot, const Instruction ins) {
+RegisterData Program::get_operand(Robot &robot, const Instruction ins) {
     if(ins.register_toggle) {
         return get_register(robot, (Robot::Register)ins.operand);
     } else {
