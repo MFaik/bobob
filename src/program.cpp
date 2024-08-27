@@ -104,7 +104,7 @@ RegisterData Program::get_operand(Robot &robot, const Instruction ins) {
     }
 }
 
-bool Program::operator==(const Program& other) {
+bool Program::operator==(const Program& other) const& {
     return std::equal(_code.begin(), _code.end(), other._code.begin()) &&
            std::equal(_labels.begin(), _labels.end(), other._labels.begin());
 }

@@ -38,7 +38,7 @@ public:
         Operation op : 7;
 
         Instruction() : op(NOP){}
-        bool operator==(const Instruction& other) {
+        bool operator==(const Instruction& other) const& {
             return operand == other.operand &&
                    register_toggle == other.register_toggle &&
                    reg == other.reg && op == other.op;
@@ -61,5 +61,5 @@ public:
     unsigned int& get_assignee(Robot &robot, Instruction ins);
     unsigned int get_operand(Robot &robot, Instruction ins);
 
-    bool operator==(const Program& other);
+    bool operator==(const Program& other) const&;
 };

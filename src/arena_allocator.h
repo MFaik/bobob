@@ -24,10 +24,10 @@ class ArenaPointer {
             i = x;
         }
         ArenaPointer() : i{0} {}
-        bool operator==(ArenaPointer&& a) const {
+        bool operator==(ArenaPointer&& a) const& {
             return a.i == i;
         }
-        bool operator==(const ArenaPointer& a) const {
+        bool operator==(const ArenaPointer& a) const& {
             return a.i == i;
         }
         bool empty() const {
