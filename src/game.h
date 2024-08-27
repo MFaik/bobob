@@ -26,8 +26,8 @@ private:
 public:
     Game();
     void set_camera(Camera2D camera);
-    void load_game(std::string file_name);
-    void save_game(std::string file_name);
+    void load_game(std::string save);
+    std::string save_game();
     void setup_program(Program program, bool reset_robots = true);
     std::string get_program();
 

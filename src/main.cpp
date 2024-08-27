@@ -1,9 +1,12 @@
 #include <imgui.h>
 #include <raylib.h>
 #include "rlImGui.h"
+ 
+#include <fstream>
 
 #include "item.h"
 #include "game.h"
+#include "util.h"
 
 #include "game_ui.h"
 extern GameUI g_game_ui;
@@ -81,11 +84,14 @@ int main() {
         //ImGui::ShowDemoWindow();
 
         if(ImGui::Button("Save")) {
-            game.save_game("test.bobob");
+            std::string save = game.save_game();
+            std::ofstream file("test.bobob", std::ios::out|std::ios::binary|std::ios::trunc);
+            file << save;
         }
         ImGui::SameLine();
         if(ImGui::Button("Load")) {
-            game.load_game("test.bobob");
+            std::string save = get_file_contents("test.bobob");
+            game.load_game(save);
             g_game_ui.set_program_text(game.get_program());
         }
         if(ImGui::Button(game.is_paused() ? "Play" : "Pause")) {

@@ -6,12 +6,11 @@
 #include <cmath>
 #include <cstdio>
 #include <algorithm>
-#include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "robot.h"
 #include "program_parser.h"
-#include "util.h"
 
 #include "game_ui.h"
 extern GameUI g_game_ui;
@@ -28,36 +27,35 @@ void Game::set_camera(Camera2D camera) {
 }
 
 //TODO: add proper error handling
-void Game::load_game(std::string file_name) {
+void Game::load_game(std::string save) {
     g_game_ui.reset_robot_windows();
     //load file
-    std::string file_str = get_file_contents(file_name.c_str());
-    const char* file = file_str.c_str();
+    const char* save_ptr = save.c_str();
     size_t start_size = 6+2*sizeof(int);
-    if(file_str.size() < start_size) {
+    if(save.size() < start_size) {
         std::cout << "file too small" << std::endl;
         return;
     }
     //file type check
-    if(strncmp(file, "bobob", 5)) {
+    if(strncmp(save_ptr, "bobob", 5)) {
         std::cout << "invalid magic numbers" << std::endl;
         return;
     }
-    file += 5;
+    save_ptr += 5;
     //version check
-    if(*file != 0) {
-        std::cout << "file version mismatch: " << *file << std::endl;
+    if(*save_ptr != 0) {
+        std::cout << "file version mismatch: " << *save_ptr << std::endl;
         return;
     }
-    file++;
+    save_ptr++;
     //get count
-    size_t chunk_cnt = ((unsigned int*)file)[0];
-    size_t robot_cnt = ((unsigned int*)file)[1];
-    file += sizeof(unsigned int)*2;
+    size_t chunk_cnt = ((unsigned int*)save_ptr)[0];
+    size_t robot_cnt = ((unsigned int*)save_ptr)[1];
+    save_ptr += sizeof(unsigned int)*2;
     size_t chunk_size = (sizeof(Tile)-sizeof(Tile::robot))*CHUNK_SIZE*CHUNK_SIZE;
     size_t robot_size = sizeof(Robot);
-    if(file_str.size() < start_size+chunk_size*chunk_cnt+robot_size*robot_cnt) {
-        std::cout << "file size mismatch: " << file_str.size() << " < " << 
+    if(save.size() < start_size+chunk_size*chunk_cnt+robot_size*robot_cnt) {
+        std::cout << "file size mismatch: " << save.size() << " < " << 
             start_size+chunk_size*chunk_cnt+robot_size*robot_cnt<< std::endl;
         return;
     }
@@ -68,13 +66,13 @@ void Game::load_game(std::string file_name) {
     }
     for(size_t c = 0;c < chunk_cnt;c++) {
         Chunk chunk;
-        std::array<int, 2> chunk_pos = *((std::array<int, 2>*)file);
-        file += sizeof(std::array<int, 2>);
+        std::array<int, 2> chunk_pos = *((std::array<int, 2>*)save_ptr);
+        save_ptr += sizeof(std::array<int, 2>);
         for(size_t t = 0;t < sizeof(Chunk::tiles)/sizeof(Tile);t++) {
-            Item type = *((Item*)file);
-            file += sizeof(Item);
-            TileData data =  *((TileData*)file);
-            file += sizeof(TileData);
+            Item type = *((Item*)save_ptr);
+            save_ptr += sizeof(Item);
+            TileData data =  *((TileData*)save_ptr);
+            save_ptr += sizeof(TileData);
             chunk.tiles[t] = Tile(type, data);
         }
         _map.load_chunk(chunk_pos, chunk);
@@ -88,13 +86,13 @@ void Game::load_game(std::string file_name) {
         auto r = _robot_allocator.allocate();
         _robots.push_back(r);
         auto& robot = *_robot_allocator.get(r);
-        robot = *((Robot*)file);
+        robot = *((Robot*)save_ptr);
         _map.add_robot(robot._x, robot._y, r);
-        file += sizeof(Robot);
+        save_ptr += sizeof(Robot);
     }
     //read code
-    file++;
-    std::string program(file);
+    save_ptr++;
+    std::string program(save_ptr);
     setup_program(parse_program(program), false);
 }
 
@@ -115,27 +113,28 @@ auto to_bytes(auto&& src) {
   return std::bit_cast<Bytes<sizeof(src)>>(src);
 }
 
-void Game::save_game(std::string file_name) {
-    std::ofstream file(file_name, std::ios::out|std::ios::binary|std::ios::trunc);
-    file << "bobob";
-    file << (char)0;
+std::string Game::save_game() {
+    std::ostringstream save;
+    save << "bobob";
+    save << (char)0;
 
-    // //TODO: copying every single chunk
+    //TODO: copying every single chunk
     auto chunks = _map.get_all_chunks();
     unsigned int chunks_size = chunks.size();
     unsigned int robots_size = _robots.size();
-    file << to_bytes(chunks_size) << to_bytes(robots_size);
+    save << to_bytes(chunks_size) << to_bytes(robots_size);
     for(auto& c : chunks) {
-        file << to_bytes(c.first);
+        save << to_bytes(c.first);
         for(Tile t : c.second.tiles) {
-            file << to_bytes(t.get_raw_type());
-            file << to_bytes(t.get_raw_data());
+            save << to_bytes(t.get_raw_type());
+            save << to_bytes(t.get_raw_data());
         }
     }
     for(auto r : _robots) {
-        file << to_bytes(*_robot_allocator.get(r));
+        save << to_bytes(*_robot_allocator.get(r));
     }
-    file << '\n' << _program._plain_text;
+    save << '\n' << _program._plain_text;
+    return save.str();
 }
 
 //TODO: find a better way to do this
