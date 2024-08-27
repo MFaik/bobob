@@ -27,7 +27,7 @@ void Game::set_camera(Camera2D camera) {
 }
 
 //TODO: add proper error handling
-void Game::load_game(std::string save) {
+void Game::load_game(const std::string& save) {
     g_game_ui.reset_robot_windows();
     //load file
     const char* save_ptr = save.c_str();
