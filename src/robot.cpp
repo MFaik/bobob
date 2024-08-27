@@ -19,8 +19,8 @@ RegisterData& Robot::get_register(Register reg) {
 }
 
 void Robot::turn(Direction dir) {
-    if(dir >= 4) {
-        _dir = (Direction)((_dir+(dir%4))%4);
+    if((char)dir >= 4) {
+        _dir = (Direction)(((char)_dir+((char)dir%4))%4);
     } else {
         _dir = dir;
     }
@@ -28,13 +28,13 @@ void Robot::turn(Direction dir) {
 
 std::array<int, 2> Robot::get_front() const {
     switch(_dir) {
-        case NORTH:
+        case Direction::NORTH:
             return {_x, _y-1};
-        case WEST:
+        case Direction::WEST:
             return {_x-1, _y};
-        case SOUTH:
+        case Direction::SOUTH:
             return {_x, _y+1};
-        case EAST:
+        case Direction::EAST:
             return {_x+1, _y};
         default:
             //TODO: find a better way to throw errors
@@ -77,6 +77,10 @@ void Robot::sleep(unsigned int ticks) {
     _sleep_dur = ticks;
 }
 
-bool Robot::operator==(const Robot& other) {
-    
+bool Robot::operator==(const Robot& other) const& {
+    for(auto reg : regs) {
+        if(this->*reg != other.*reg)
+            return false;
+    }
+    return other._x == _x && other._y == _y && other._dir == _dir;
 }

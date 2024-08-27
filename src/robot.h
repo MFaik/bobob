@@ -6,7 +6,7 @@
 
 class Map;
 
-enum Direction : char {
+enum class Direction : char {
     NORTH,
     EAST,
     SOUTH,
@@ -35,7 +35,7 @@ public:
     unsigned int _sleep_dur = 0;
 public:
     int _x, _y;
-    Direction _dir = NORTH;
+    Direction _dir = Direction::NORTH;
 
     enum Register {
         A,
@@ -65,5 +65,5 @@ public:
     void use(Map& map, RegisterData i);
     void sleep(unsigned int ticks);
 
-    bool operator==(const Robot& other);
+    bool operator==(const Robot& other) const&;
 };
