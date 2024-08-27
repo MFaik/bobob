@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 #include "program.h"
@@ -101,4 +102,9 @@ RegisterData Program::get_operand(Robot &robot, const Instruction ins) {
     } else {
         return ins.operand;
     }
+}
+
+bool Program::operator==(const Program& other) {
+    return std::equal(_code.begin(), _code.end(), other._code.begin()) &&
+           std::equal(_labels.begin(), _labels.end(), other._labels.begin());
 }
