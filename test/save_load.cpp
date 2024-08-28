@@ -1,7 +1,12 @@
 #include "catch_amalgamated.h"
 
+#include <string>
+
 #include "game.h"
+#include "robot.h"
+#include "tile.h"
 #include "program_parser.h"
+#include "program.h"
 
 TEST_CASE("game save", "[game]") {
     Game game;
@@ -24,35 +29,36 @@ TEST_CASE("game save", "[game]") {
     }
 
     std::string program_str = 
-        "MOV A 12\
-        MOV COND 32\
-        MOV B 20\
-        MOV C 18\
-        JMP loop\
-        loop:\
-        GO\
-        SUB COND 1\
-        JNE loop\
-        JEQ skip\
-        skip:\
-        LOOK\
-        NOP\
-        CMP A 12\
-        USE C\
-        TURN BACK\
-        TURN SOUTH\
-        ADD A B\
-        ADD C 3";
+        "MOV A 12\n\
+        MOV COND 32\n\
+        MOV B 20\n\
+        MOV C 18\n\
+        JMP loop\n\
+        loop:\n\
+        GO\n\
+        SUB COND 1\n\
+        JNE loop\n\
+        JEQ skip\n\
+        skip:\n\
+        LOOK\n\
+        NOP\n\
+        CMP A 12\n\
+        USE C\n\
+        TURN BACK\n\
+        TURN SOUTH\n\
+        ADD A B\n\
+        ADD C 3\n";
     Program program = parse_program(program_str);
-    game.setup_program(program);
+    game.set_program(program);
 
     Game game2;
     game2.load_game(game.save_game());
 
     SECTION("robots") {
         for(int i = -20;i < 20;i++) {
-            REQUIRE(*game.get_robot(i*100+12, i*20+17) == 
-                    *game2.get_robot(i*100+12, i*20+17));
+            if(game.get_tile(i*100+12, i*20+17).get_type() == Item::ROBOT)
+                REQUIRE(*game.get_robot(i*100+12, i*20+17) == 
+                        *game2.get_robot(i*100+12, i*20+17));
         }
     }
 
