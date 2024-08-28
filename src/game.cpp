@@ -93,7 +93,7 @@ void Game::load_game(const std::string& save) {
     //read code
     save_ptr++;
     std::string program(save_ptr);
-    setup_program(parse_program(program), false);
+    set_program(parse_program(program), false);
 }
 
 template<int N>
@@ -138,7 +138,7 @@ std::string Game::save_game() {
 }
 
 //TODO: find a better way to do this
-void Game::setup_program(Program program, bool reset_robots) {
+void Game::set_program(Program program, bool reset_robots) {
     std::swap(_program, program);
     if(reset_robots) {
         for(auto r : _robots) {

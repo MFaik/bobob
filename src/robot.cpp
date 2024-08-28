@@ -49,7 +49,6 @@ void Robot::go_forward(Map& map) {
     if(front_tile.robot.empty() && front_tile.get_type() != Item::BASE) {
         _x = x;
         _y = y;
-        _input = (int)map.get_tile(x, y).get_type();
     } else {
         //TODO: make this BLOCKED
         _input = 999;
@@ -60,9 +59,9 @@ void Robot::look(Map& map) {
     auto [x, y] = get_front();
     const auto& tile = map.get_tile(x, y);
     if(tile.robot.empty())
-        _input = (short int)map.get_tile(x, y).get_type();
+        _input = (RegisterData)tile.get_type();
     else
-        _input = (short int)Item::ROBOT;
+        _input = (RegisterData)Item::ROBOT;
 }
 
 void Robot::use(Map& map, RegisterData sel) {

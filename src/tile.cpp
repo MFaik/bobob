@@ -174,7 +174,7 @@ void Tile::draw(int x, int y, Game& game) const& {
                        (float)y*TILE_SIZE+TILE_SIZE/2.0f, 
                        TILE_SIZE, TILE_SIZE }, 
             Vector2{TILE_SIZE/2.0, TILE_SIZE/2.0}, 
-            game.get_robot(robot)->_dir*90, WHITE
+            (int)game.get_robot(robot)->_dir*90, WHITE
         );
     }
 }

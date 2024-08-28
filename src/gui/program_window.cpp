@@ -31,7 +31,7 @@ bool ProgramWindow::draw(Game &game) {
                         _editor.SetErrorMarkers(errors);
                     }
                 } else {
-                    game.setup_program(program);
+                    game.set_program(program);
                 }
             }
             ImGui::EndMenuBar();
