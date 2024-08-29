@@ -59,7 +59,7 @@ bool RobotWindow::draw() {
             ImGui::EndTable();
         }
         //ImGui::SameLine();
-        if(ImGui::BeginTable("registers", 4, ImGuiTableFlags_Borders)) {
+        if(ImGui::BeginTable("items", 4, ImGuiTableFlags_Borders)) {
             for(int i = 0;i < 16;i++) {
                 ImGui::TableNextColumn();
                 Item item = _robot->_inventory[i];
@@ -73,6 +73,9 @@ bool RobotWindow::draw() {
                 }
             }
             ImGui::EndTable();
+        }
+        if(ret && ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive()) {
+            ImGui::SetWindowFocus(nullptr);
         }
         ImGui::End();
     }

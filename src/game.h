@@ -43,7 +43,7 @@ public:
 
     void draw();
 
-    void tick(bool mouse, bool keyboard);
+    void tick(float delta, bool mouse, bool keyboard);
     void fixed_tick(bool ignore_pause = false);
 
     void toggle_pause();

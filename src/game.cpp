@@ -245,7 +245,7 @@ void Game::draw() {
     EndMode2D();
 }
 
-void Game::tick(bool mouse, bool keyboard) {
+void Game::tick(float delta, bool mouse, bool keyboard) {
     if(keyboard) {
         int speed = 20/_camera.zoom;
         if(IsKeyDown(KEY_RIGHT)) {
@@ -277,18 +277,52 @@ void Game::tick(bool mouse, bool keyboard) {
         }
     }
     if(mouse) {
-        //TODO: fix mouse press position
+        //map use
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             Vector2 mouse_pos = GetScreenToWorld2D(GetMousePosition(), _camera);
             mouse_pos = Vector2Scale(mouse_pos, 1.0f/TILE_SIZE);
             mouse_pos = Vector2{std::floor(mouse_pos.x), std::floor(mouse_pos.y)};
             auto& robot = _map.get_tile(mouse_pos.x, mouse_pos.y).robot;
             if(robot.empty()) {
-                _map.use(mouse_pos.x, mouse_pos.y, current_item, true);
+                if(current_item != Item::EMPTY)
+                    _map.use(mouse_pos.x, mouse_pos.y, current_item, true);
             } else {
                 g_game_ui.add_robot_window(_robot_allocator.get(robot));
             }
         }
+        //drag/destroy
+        static Vector2 initial_right_pos{0, 0};
+        static Vector2 last_right_pos{0, 0};
+        static bool is_drag = false;
+        static bool first_up = false;
+        if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+            Vector2 mouse_pos = GetMousePosition();
+            if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
+                initial_right_pos = GetMousePosition();
+                last_right_pos = mouse_pos;
+                is_drag = false;
+                first_up = true;
+            }
+            Vector2 diff = Vector2Subtract(last_right_pos, mouse_pos);
+            diff = Vector2Scale(diff, 1.0f/_camera.zoom);
+            _camera.target = Vector2Add(_camera.target, diff);
+
+            if(Vector2Distance(initial_right_pos, mouse_pos) > 20) {
+                is_drag = true;
+            }
+
+            last_right_pos = mouse_pos;
+        } else {
+            if(!is_drag && first_up) {
+                Vector2 mouse_pos = GetScreenToWorld2D(GetMousePosition(), _camera);
+                mouse_pos = Vector2Scale(mouse_pos, 1.0f/TILE_SIZE);
+                mouse_pos = Vector2{std::floor(mouse_pos.x), std::floor(mouse_pos.y)};
+                _map.get_tile_ref(mouse_pos.x, mouse_pos.y) = Tile(Item::EMPTY);
+                is_drag = false;
+            }
+            first_up = false;
+        }
+        //zoom
         if(!FloatEquals(GetMouseWheelMove(), 0)) {
             float zoom_change = 1;
             if(GetMouseWheelMove() < 0 && _camera.zoom > 0.4f)

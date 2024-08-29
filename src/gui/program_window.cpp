@@ -10,7 +10,7 @@ ProgramWindow::ProgramWindow(std::string title) : _title(title), _editor() {
 }
 
 bool ProgramWindow::draw(Game &game) {
-    ImGuiWindowFlags flag = 0;
+    ImGuiWindowFlags flag = ImGuiWindowFlags_None;
     flag |= ImGuiWindowFlags_NoCollapse;
     flag |= ImGuiWindowFlags_MenuBar;
     bool ret = true;
@@ -39,6 +39,9 @@ bool ProgramWindow::draw(Game &game) {
 
         _editor.Render("TextEditor");
 
+        if(ret && ImGui::IsWindowFocused() && !ImGui::IsAnyItemActive()) {
+            ImGui::SetWindowFocus(nullptr);
+        }
         ImGui::End();
     }
     return ret;

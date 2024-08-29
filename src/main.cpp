@@ -118,8 +118,8 @@ int main() {
         bool keyboard_free = !ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow);
         
         rlImGuiEnd();
-
-        game.tick(mouse_free, keyboard_free);
+        
+        game.tick(GetFrameTime(), mouse_free, keyboard_free);
 
         DrawFPS(0, 0);
         EndDrawing();
