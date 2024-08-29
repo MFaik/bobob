@@ -145,6 +145,10 @@ Item Map::use(int x, int y, Item item, bool manual) {
                 push_update({x, y, TileUpdate::BURN}, manual);
                 return Item::EMPTY;
             }
+            if(tile.get_type() == Item::APPLE) {
+                get_tile_ref(x, y) = Tile(Item::BOX);
+                return Item::EMPTY;
+            }
             break;
         case Item::LAVA:
             if(tile.get_type() == Item::EMPTY) {
